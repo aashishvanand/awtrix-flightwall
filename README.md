@@ -83,7 +83,7 @@ instead. `upload_icons.sh` already does this correctly.
 
 ## n8n workflow
 
-`workflow.json` is an importable n8n workflow. Import it via n8n's
+`n8n_aircraft_workflow.json` is an importable n8n workflow. Import it via n8n's
 **Import from File** and fill in the placeholders in the first **Config** node:
 
 | Field | What it is |
@@ -125,19 +125,19 @@ imports inactive by default.
 ├── README.md
 ├── convert_tiles.py          # tailfin/*.webp -> icons/*_logo.gif
 ├── upload_icons.sh           # bulk-upload icons/ to the clock
-├── workflow.json             # importable n8n workflow (secrets scrubbed)
+├── n8n_aircraft_workflow.json # importable n8n workflow (secrets scrubbed)
 ├── tailfin/                  # source airline tail logos (gitignored — see below)
-└── icons/                    # generated 8x8 icons — airline logos (gitignored — see below)
+└── icons/                    # generated 8x8 icons — airline logos
 ```
 
 ## Before you publish this repo
 
 - **`.env`** holds your n8n API key — already gitignored, do not remove that entry.
-- **`tailfin/` and `icons/`** contain airline tail logos and derivatives of them —
+- **`tailfin/`** contain airline tail logos and derivatives of them —
   these are third-party trademarked assets, not yours to redistribute, so
   they're gitignored by default. Publish the pipeline (the scripts), not the
   logo files themselves. If you fork this for your own use, regenerate them
   locally from your own source images.
-- **`workflow.json`** has had its OpenSky client ID/secret replaced with
+- **`n8n_aircraft_workflow.json`** has had its OpenSky client ID/secret replaced with
   placeholders — double-check before committing that you didn't re-paste real
   credentials in while editing.
