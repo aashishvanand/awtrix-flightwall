@@ -1,0 +1,157 @@
+{
+  "name": "AWTRIX - Aircraft Overhead (SIN)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "seconds", "secondsInterval": 30 }
+          ]
+        }
+      },
+      "name": "Every 30s",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1200, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "name": "HOME_LAT", "type": "string", "value": "YOUR_HOME_LAT" },
+            { "name": "HOME_LON", "type": "string", "value": "YOUR_HOME_LON" },
+            { "name": "RADIUS_DEG", "type": "number", "value": 0.15 },
+            { "name": "CLOCK_IP", "type": "string", "value": "YOUR_CLOCK_IP" },
+            { "name": "OPENSKY_CLIENT_ID", "type": "string", "value": "PASTE_CLIENT_ID" },
+            { "name": "OPENSKY_CLIENT_SECRET", "type": "string", "value": "PASTE_CLIENT_SECRET" }
+          ]
+        }
+      },
+      "name": "Config (edit per location)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-1000, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "grant_type", "value": "client_credentials" },
+            { "name": "client_id", "value": "={{ $json.OPENSKY_CLIENT_ID }}" },
+            { "name": "client_secret", "value": "={{ $json.OPENSKY_CLIENT_SECRET }}" }
+          ]
+        }
+      },
+      "name": "Get OpenSky Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-800, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://opensky-network.org/api/states/all?lamin={{ $('Config (edit per location)').item.json.HOME_LAT - $('Config (edit per location)').item.json.RADIUS_DEG }}&lomin={{ $('Config (edit per location)').item.json.HOME_LON - $('Config (edit per location)').item.json.RADIUS_DEG }}&lamax={{ $('Config (edit per location)').item.json.HOME_LAT + $('Config (edit per location)').item.json.RADIUS_DEG }}&lomax={{ $('Config (edit per location)').item.json.HOME_LON + $('Config (edit per location)').item.json.RADIUS_DEG }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $json.access_token }}" }
+          ]
+        }
+      },
+      "name": "Fetch Nearby States",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-600, 0]
+    },
+    {
+      "parameters": {
+        "jsClass": "",
+        "jsCode": "// Find the aircraft closest to HOME_LAT/HOME_LON among the returned states.\nconst cfg = $('Config (edit per location)').item.json;\nconst states = $input.first().json.states || [];\n\nfunction haversineKm(lat1, lon1, lat2, lon2) {\n  const R = 6371;\n  const dLat = (lat2 - lat1) * Math.PI / 180;\n  const dLon = (lon2 - lon1) * Math.PI / 180;\n  const a = Math.sin(dLat / 2) ** 2 +\n    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *\n    Math.sin(dLon / 2) ** 2;\n  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n}\n\nconst candidates = states\n  .filter(s => s[5] !== null && s[6] !== null && s[1] && s[1].trim() && s[8] === false)\n  .map(s => ({\n    callsign: s[1].trim(),\n    lon: s[5],\n    lat: s[6],\n    altitude: s[7],\n    distanceKm: haversineKm(cfg.HOME_LAT, cfg.HOME_LON, s[6], s[5])\n  }))\n  .sort((a, b) => a.distanceKm - b.distanceKm);\n\nif (candidates.length === 0) {\n  return [{ json: { found: false } }];\n}\n\nreturn [{ json: { found: true, ...candidates[0] } }];"
+      },
+      "name": "Nearest Aircraft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-400, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.found }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Aircraft Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-200, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.adsbdb.com/v0/callsign/{{ $json.callsign }}"
+      },
+      "name": "Lookup Route (adsbdb)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, -80],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const nearest = $('Nearest Aircraft').item.json;\nconst resp = $input.first().json;\nconst route = resp && resp.response && resp.response.flightroute;\n\nlet payload;\nif (route) {\n  const airlineIata = route.airline && route.airline.iata ? route.airline.iata.toLowerCase() : null;\n  const from = route.origin ? (route.origin.iata_code || route.origin.icao_code) : '???';\n  const to = route.destination ? (route.destination.iata_code || route.destination.icao_code) : '???';\n  payload = {\n    text: `${nearest.callsign} ${from}-${to}`,\n    duration: 5,\n    textCase: 2\n  };\n  if (airlineIata) payload.icon = `${airlineIata}_logo`;\n} else {\n  payload = {\n    text: nearest.callsign,\n    duration: 5,\n    textCase: 2\n  };\n}\nreturn [{ json: payload }];"
+      },
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, -80]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://{{ $('Config (edit per location)').item.json.CLOCK_IP }}/api/custom?name=adsb",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "name": "Push to Clock",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, -80]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://{{ $('Config (edit per location)').item.json.CLOCK_IP }}/api/custom?name=adsb",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={}"
+      },
+      "name": "Clear Clock",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 80]
+    }
+  ],
+  "connections": {
+    "Every 30s": { "main": [[{ "node": "Config (edit per location)", "type": "main", "index": 0 }]] },
+    "Config (edit per location)": { "main": [[{ "node": "Get OpenSky Token", "type": "main", "index": 0 }]] },
+    "Get OpenSky Token": { "main": [[{ "node": "Fetch Nearby States", "type": "main", "index": 0 }]] },
+    "Fetch Nearby States": { "main": [[{ "node": "Nearest Aircraft", "type": "main", "index": 0 }]] },
+    "Nearest Aircraft": { "main": [[{ "node": "Aircraft Found?", "type": "main", "index": 0 }]] },
+    "Aircraft Found?": {
+      "main": [
+        [{ "node": "Lookup Route (adsbdb)", "type": "main", "index": 0 }],
+        [{ "node": "Clear Clock", "type": "main", "index": 0 }]
+      ]
+    },
+    "Lookup Route (adsbdb)": { "main": [[{ "node": "Build Payload", "type": "main", "index": 0 }]] },
+    "Build Payload": { "main": [[{ "node": "Push to Clock", "type": "main", "index": 0 }]] }
+  }
+}

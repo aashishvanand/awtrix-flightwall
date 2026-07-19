@@ -1,0 +1,19 @@
+# secrets
+.env
+
+# macOS
+.DS_Store
+
+# third-party airline tail logo assets - not yours to redistribute publicly
+tailfin/
+icons/
+logo/
+
+# scratch
+*.log
+
+# local upload state (tracks what's already on the clock)
+.upload_state.json
+
+#image
+tailfin/
