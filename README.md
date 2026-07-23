@@ -48,16 +48,18 @@ AWTRIX device  -> /ICONS/sq_logo.gif
 
 Converts everything in `tailfin/` to 8x8 icons in `icons/`:
 
-- crops to the logo's actual content first (source images tend to have padding,
-  which otherwise gets squashed into the 8x8 result and washes out the colors)
-- composites onto a **black** background, not white or transparent (AWTRIX
-  glitches on transparency, and black blends into the matrix's off-pixels)
-- boosts saturation/contrast, since a straight resize to 8px looks muddy
-- saves as 16-color indexed GIF, matching AWTRIX's supported format
+- **Smart Emblem Focus**: Detects the actual logo mark inside the tailfin (birds, cranes, flags, symbols) and crops tightly around it so emblem details fill 6x6 or 7x7 of the 8x8 matrix instead of 2x2.
+- **Aspect Ratio & Centering**: Fits logos proportionally and centers them on an 8x8 black canvas with clean 1px padding.
+- **Multi-Stage Downscaling**: Uses unsharp masking and two-pass reduction to maintain sharp contrast boundaries.
+- **No-Dithering Quantization**: Saves as clean solid-pixel indexed GIFs without Floyd-Steinberg dot-matrix noise.
 
 ```bash
 python3 -m venv venv && venv/bin/pip install pillow numpy
-venv/bin/python convert_tiles.py
+venv/bin/python convert_tiles.py                 # Default: emblem focus mode
+# Or choose a specific mode:
+venv/bin/python convert_tiles.py --mode emblem   # Zoomed emblem mark (recommended)
+venv/bin/python convert_tiles.py --mode fin      # Full tailfin shape
+venv/bin/python convert_tiles.py --mode tight    # Strict bounding box
 ```
 
 Output filenames follow `{iata-lowercase}_logo.gif`, e.g. `tailfin/SQ.webp` ->
@@ -70,10 +72,12 @@ Bulk-uploads everything in `icons/` to the clock over its built-in LittleFS file
 editor (`http://<CLOCK_IP>/edit`).
 
 ```bash
-./upload_icons.sh
+./upload_icons.sh           # Uploads only new or modified icons (cached via .upload_state.json)
+./upload_icons.sh --force   # Force re-uploads ALL icons to AWTRIX (useful after clock reset)
+./upload_icons.sh --clean   # Clears local upload state cache file
 ```
 
-Set `CLOCK_IP` at the top of the script to your clock's static IP.
+Set `CLOCK_IP` at the top of the script (or run `CLOCK_IP=192.168.x.x ./upload_icons.sh`).
 
 **Note on the upload API:** the AWTRIX file editor is ESPAsyncWebServer's
 `SPIFFSEditor`. The destination path has to be embedded in the multipart
