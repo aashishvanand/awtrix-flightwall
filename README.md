@@ -105,11 +105,10 @@ airlines it will realistically see:
 
 ```
 icons/
-├── asia/        africa_me/   americas/   europe/   oceania/   global/   # active carriers, by primary region
-│                                                                         # (global = long-haul flag carriers worth keeping everywhere, e.g. Emirates, Qatar)
-├── defunct/     # confirmed ceased-operations / merged-away brands — kept as files, just excluded from uploads
-├── review/      # unidentified codes, or military/government ADS-B callsigns (not commercial airlines)
-└── classification.txt   # code -> {status, continent, sg_relevant, note} — the research behind this split
+├── asia/        africa_me/   americas/   europe/   oceania/   global/   # active & state carriers, by region / intercontinental reach
+│                                                                         # (global = default icon 00 + long-haul intercontinental flag carriers)
+├── defunct/     # confirmed ceased-operations / merged-away brands — kept as files, excluded from uploads
+└── classification.txt   # code -> {folder, status, continent, sg_relevant, name, note} — the research behind this split
 ```
 
 **Why this exists:** LittleFS allocates a fixed minimum block per file
@@ -123,8 +122,8 @@ by hand (or regenerate it) whenever you add or reclassify a code.
 ### 3. `upload_icons.sh`
 
 Uploads a chosen set of region subfolders to the clock via AWTRIX NG's file
-API (`POST /api/v1/files?dir=/ICONS`). `defunct/` and `review/` are never
-uploaded, even with the default region list.
+API (`POST /api/v1/files?dir=/ICONS`). `defunct/` is never uploaded, even
+with the default region list.
 
 ```bash
 ./upload_icons.sh                       # Uploads all six regions (asia, europe, americas, africa_me, oceania, global)

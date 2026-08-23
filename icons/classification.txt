@@ -10,322 +10,322 @@
 #
 code	folder   	status 	continent	sg_relevant	name                                                               	note
 ----	---------	-------	---------	-----------	-------------------------------------------------------------------	--------------------------------------------------------------------------------------------------------------------------
-00  	review   	unknown	asia     	false      	Unknown/unidentified                                               	No standard IATA airline code '00' found; possibly a placeholder or misparsed code
-1i  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Could not confidently identify code 1I
-2k  	defunct  	defunct	americas 	false      	Aerogal (Aerolineas Galapagos)                                     	Merged into Avianca Ecuador in 2013, brand retired
-2l  	europe   	active 	europe   	false      	Helvetic Airways                                                   	Swiss regional/charter carrier
-2p  	asia     	active 	asia     	false      	Philippines AirAsia                                                	Mostly Philippines domestic/regional
-2q  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous 2-letter code, no confident match
-3k  	asia     	active 	asia     	true       	Jetstar Asia                                                       	Singapore-based carrier
-3l  	review   	unknown	europe   	false      	Unknown/unidentified                                               	Ambiguous historical code (possibly Intersky/Aircompany Armenia), low confidence
-3m  	americas 	active 	americas 	false      	Silver Airways                                                     	US regional (Florida/Caribbean)
-3o  	africa_me	active 	africa_me	false      	Air Arabia Maroc                                                   	Morocco-based LCC subsidiary
-3u  	asia     	active 	asia     	true       	Sichuan Airlines                                                   	Major Chinese carrier, growing international network
-3v  	europe   	active 	europe   	false      	ASL Airlines Belgium                                               	Cargo carrier
-3y  	europe   	active 	europe   	false      	Yamal Airlines                                                     	Russian regional, limited international reach post-2022 sanctions
-4c  	americas 	active 	americas 	false      	LATAM Colombia (ex-Aires)
-4y  	defunct  	defunct	europe   	false      	Eurowings Europe                                                   	Ceased operations 2020, merged into Eurowings
-5h  	review   	unknown	africa_me	false      	Fly540                                                             	Kenya-based, financial troubles reported; current operating status uncertain
-5j  	asia     	active 	asia     	true       	Cebu Pacific                                                       	Philippines LCC, flies to Singapore
-5o  	europe   	active 	europe   	false      	ASL Airlines France                                                	Cargo carrier
-5t  	americas 	active 	americas 	false      	Canadian North                                                     	Canadian regional
-5w  	europe   	active 	europe   	false      	Wizz Air Malta
-5x  	americas 	active 	americas 	true       	UPS Airlines                                                       	Global cargo, serves Asia hubs
-5y  	americas 	active 	americas 	true       	Atlas Air                                                          	Global cargo/charter
-6b  	defunct  	defunct	europe   	false      	Blue1                                                              	Finnish carrier, ceased operations 2016
-6e  	asia     	active 	asia     	true       	IndiGo                                                             	India's largest carrier, serves Singapore
-7c  	asia     	active 	asia     	true       	Jeju Air                                                           	Korean LCC with SEA routes
-7g  	asia     	active 	asia     	false      	Star Flyer                                                         	Japan domestic only
-8c  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-9c  	asia     	active 	asia     	true       	Spring Airlines                                                    	Chinese LCC with some SEA routes
-9e  	americas 	active 	americas 	false      	Endeavor Air                                                       	Delta Connection US regional
-9p  	asia     	active 	asia     	false      	Fly Jinnah                                                         	Pakistani LCC, domestic/regional focus
-9t  	americas 	active 	americas 	false      	Transwest Air                                                      	Canadian regional
-9w  	defunct  	defunct	asia     	false      	Jet Airways                                                        	Ceased ops 2019; relaunch attempts stalled, not commercially flying as of 2026
-a0  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-a3  	europe   	active 	europe   	false      	Aegean Airlines
-a5  	defunct  	defunct	europe   	false      	HOP! (Air France)                                                  	Brand retired 2021, absorbed into Air France
-aa  	americas 	active 	americas 	false      	American Airlines                                                  	Major US carrier, no direct Singapore route
-ab  	defunct  	defunct	europe   	false      	Air Berlin                                                         	Ceased operations 2017
-ac  	americas 	active 	americas 	false      	Air Canada                                                         	No direct Singapore route
-ad  	americas 	active 	americas 	false      	Azul Brazilian Airlines
-adb 	europe   	active 	europe   	false      	Antonov Airlines                                                   	Ukrainian heavy-lift cargo operator (state design bureau), callsign ADB
-af  	europe   	active 	europe   	true       	Air France                                                         	Serves Singapore
-ai  	asia     	active 	asia     	true       	Air India
-ak  	asia     	active 	asia     	true       	AirAsia                                                            	Malaysia-based, major SG connectivity
-am  	americas 	active 	americas 	false      	Aeromexico
-an  	defunct  	defunct	oceania  	false      	Ansett Australia                                                   	Ceased operations 2001
-ao  	review   	unknown	europe   	false      	Aerocondor                                                         	Portuguese carrier, uncertain current status
-ar  	americas 	active 	americas 	false      	Aerolineas Argentinas
-as  	americas 	active 	americas 	false      	Alaska Airlines
-asy 	review   	state  	oceania  	false      	Royal Australian Air Force                                         	IATA/ICAO code used for RAAF operations
-at  	africa_me	active 	africa_me	false      	Royal Air Maroc
-av  	americas 	active 	americas 	false      	Avianca
-ax  	defunct  	defunct	americas 	false      	Trans States Airlines                                              	Ceased operations 2020
-ay  	europe   	active 	europe   	false      	Finnair                                                            	No current direct Singapore route
-az  	europe   	active 	europe   	false      	ITA Airways                                                        	Successor to Alitalia
-b6  	americas 	active 	americas 	false      	JetBlue
-ba  	europe   	active 	europe   	true       	British Airways                                                    	Serves Singapore
-bc  	asia     	active 	asia     	false      	Skymark Airlines                                                   	Japan domestic
-bd  	defunct  	defunct	europe   	false      	bmi (British Midland)                                              	Ceased operations 2012
-be  	defunct  	defunct	europe   	false      	Flybe                                                              	Ceased 2020, brief relaunch failed again 2023
-bf  	europe   	active 	europe   	false      	French Bee
-bi  	asia     	active 	asia     	true       	Royal Brunei Airlines                                              	Regional neighbor, flies near/to Singapore
-br  	asia     	active 	asia     	true       	EVA Air                                                            	Major Taiwanese carrier, serves Singapore
-bs  	asia     	active 	asia     	false      	US-Bangla Airlines
-bt  	europe   	active 	europe   	false      	airBaltic
-bw  	americas 	active 	americas 	false      	Caribbean Airlines
-by  	europe   	active 	europe   	false      	TUI Airways
-bz  	review   	unknown	europe   	false      	Blue Bird Airways                                                  	Small Greek charter carrier, uncertain current status
-c5  	americas 	active 	americas 	false      	CommutAir                                                          	US regional
-c8  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-ca  	asia     	active 	asia     	true       	Air China
-cc  	europe   	active 	europe   	false      	Air Atlanta Icelandic                                              	Charter/ACMI wet-lease carrier
-cfc 	review   	state  	americas 	false      	Canadian Armed Forces                                              	Military callsign 'Canforce'
-ci  	asia     	active 	asia     	true       	China Airlines
-ck  	asia     	active 	asia     	true       	China Cargo Airlines
-cl  	europe   	active 	europe   	false      	Lufthansa CityLine
-cm  	americas 	active 	americas 	false      	Copa Airlines
-cp  	defunct  	defunct	americas 	false      	Compass Airlines                                                   	Ceased operations 2020
-cul 	review   	unknown	americas 	false      	Unknown/unidentified                                               	CUL matches an airport code (Culiacan, Mexico), not a known airline code - possibly mislabeled
-cv  	europe   	active 	europe   	true       	Cargolux                                                           	Major global cargo carrier, serves Asia
-cx  	asia     	active 	asia     	true       	Cathay Pacific
-cz  	asia     	active 	asia     	true       	China Southern Airlines
-d0  	americas 	active 	americas 	false      	DHL Aero Expreso                                                   	Panama-based DHL cargo affiliate
-d5  	europe   	active 	europe   	true       	DHL Air UK                                                         	Global cargo network
-d7  	asia     	active 	asia     	true       	AirAsia X                                                          	Long-haul LCC from Malaysia
-d8  	europe   	active 	europe   	false      	Norwegian Air Sweden
-dd  	asia     	active 	asia     	false      	Nok Air                                                            	Thailand domestic
-de  	europe   	active 	europe   	false      	Condor
-dh  	defunct  	defunct	americas 	false      	Independence Air                                                   	US carrier, ceased 2006; code may have been reused since
-dj  	review   	unknown	africa_me	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-dl  	americas 	active 	americas 	false      	Delta Air Lines                                                    	No direct Singapore route
-ds  	europe   	active 	europe   	false      	easyJet Switzerland
-dx  	europe   	active 	europe   	false      	Danish Air Transport
-dy  	europe   	active 	europe   	false      	Norwegian Air Shuttle
-e4  	europe   	active 	europe   	false      	Enter Air                                                          	Polish charter carrier
-e5  	africa_me	active 	africa_me	false      	Air Arabia Egypt                                                   	Code previously used by Samara Airlines (defunct)
-e6  	review   	unknown	europe   	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-ea  	defunct  	defunct	americas 	false      	Eastern Airlines (revived brand)                                   	Revived-brand carrier that ceased operations again ~2020
-eb  	europe   	active 	europe   	false      	Wamos Air                                                          	Spanish charter carrier
-ec  	review   	unknown	europe   	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-eh  	asia     	active 	asia     	false      	ANA Wings                                                          	ANA regional subsidiary
-ei  	europe   	active 	europe   	false      	Aer Lingus
-ek  	global   	active 	global   	true       	Emirates
-en  	europe   	active 	europe   	false      	Air Dolomiti                                                       	Lufthansa regional (Italy)
-es  	defunct  	defunct	europe   	false      	Estonian Air                                                       	Ceased operations 2015
-et  	global   	active 	global   	true       	Ethiopian Airlines                                                 	Serves Singapore
-ew  	europe   	active 	europe   	false      	Eurowings
-ey  	global   	active 	global   	true       	Etihad Airways
-f8  	americas 	active 	americas 	false      	Flair Airlines                                                     	Canadian LCC
-f9  	americas 	active 	americas 	false      	Frontier Airlines
-fc  	americas 	active 	americas 	false      	Pacific Coastal Airlines                                           	Canadian regional
-fd  	asia     	active 	asia     	true       	Thai AirAsia
-fi  	europe   	active 	europe   	false      	Icelandair
-fj  	oceania  	active 	oceania  	true       	Fiji Airways                                                       	Flies Singapore-Nadi route
-fr  	europe   	active 	europe   	false      	Ryanair
-fx  	americas 	active 	americas 	true       	FedEx Express                                                      	Global cargo, Asia/SG presence
-fz  	africa_me	active 	africa_me	false      	flydubai                                                           	No direct Singapore route currently
-g3  	americas 	active 	americas 	false      	Gol Linhas Aereas
-g4  	americas 	active 	americas 	false      	Allegiant Air
-g7  	americas 	active 	americas 	false      	GoJet Airlines                                                     	US regional
-g9  	africa_me	active 	africa_me	false      	Air Arabia                                                         	UAE LCC
-ga  	asia     	active 	asia     	true       	Garuda Indonesia
-gaf 	review   	state  	europe   	false      	German Air Force                                                   	Military callsign 'GAF'
-gb  	americas 	active 	americas 	false      	ABX Air                                                            	US cargo, mostly domestic
-gf  	africa_me	active 	africa_me	true       	Gulf Air                                                           	Serves Singapore
-gk  	asia     	active 	asia     	false      	Jetstar Japan
-gl  	europe   	active 	europe   	false      	Air Greenland
-gu  	defunct  	defunct	americas 	false      	Aviateca                                                           	Guatemalan brand retired, absorbed into Avianca
-ha  	americas 	active 	americas 	false      	Hawaiian Airlines
-hb  	asia     	active 	asia     	false      	Greater Bay Airlines                                               	Newer Hong Kong carrier, regional focus
-hd  	asia     	active 	asia     	false      	Air Do                                                             	Japan domestic
-hk  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-ho  	asia     	active 	asia     	false      	Juneyao Airlines                                                   	Chinese carrier; SG route unconfirmed
-hu  	asia     	active 	asia     	true       	Hainan Airlines
-hv  	europe   	active 	europe   	false      	Transavia
-hx  	asia     	active 	asia     	true       	Hong Kong Airlines
-hy  	asia     	active 	asia     	false      	Uzbekistan Airways
-i2  	europe   	active 	europe   	false      	Iberia Express
-ib  	europe   	active 	europe   	false      	Iberia
-id  	asia     	active 	asia     	true       	Batik Air                                                          	Indonesian carrier serving Singapore
-ir  	africa_me	active 	africa_me	false      	Iran Air
-it  	defunct  	defunct	asia     	false      	Kingfisher Airlines                                                	Ceased operations 2012
-iw  	asia     	active 	asia     	false      	Wings Air                                                          	Indonesian regional (Lion Group)
-j2  	europe   	active 	europe   	false      	Azerbaijan Airlines
-j4  	review   	unknown	africa_me	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-j9  	africa_me	active 	africa_me	false      	Jazeera Airways                                                    	Kuwait LCC
-jc  	asia     	active 	asia     	false      	Japan Air Commuter                                                 	JAL regional subsidiary
-jj  	americas 	active 	americas 	false      	LATAM Brasil                                                       	Formerly TAM
-jl  	asia     	active 	asia     	true       	Japan Airlines
-jm  	defunct  	defunct	americas 	false      	Air Jamaica                                                        	Absorbed into Caribbean Airlines 2015
-jo  	defunct  	defunct	oceania  	false      	JetGo Australia                                                    	Ceased operations 2019
-jq  	oceania  	active 	oceania  	true       	Jetstar Airways                                                    	Serves Singapore
-jt  	asia     	active 	asia     	true       	Lion Air
-ju  	europe   	active 	europe   	false      	Air Serbia
-jx  	asia     	active 	asia     	true       	Starlux Airlines                                                   	Taiwanese carrier serving Singapore
-k4  	americas 	active 	americas 	true       	Kalitta Air                                                        	Global cargo/charter
-kc  	asia     	active 	asia     	false      	Air Astana                                                         	Kazakhstan
-kda 	defunct  	defunct	oceania  	false      	Kendell Airlines                                                   	Australian regional carrier, ceased operations 2005
-ke  	asia     	active 	asia     	true       	Korean Air
-ki  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-kl  	europe   	active 	europe   	true       	KLM                                                                	Serves Singapore
-kn  	asia     	active 	asia     	false      	China United Airlines
-kq  	africa_me	active 	africa_me	false      	Kenya Airways
-kt  	review   	unknown	africa_me	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-ku  	africa_me	active 	africa_me	false      	Kuwait Airways
-l3  	review   	unknown	europe   	false      	Unknown/unidentified                                               	Ambiguous code (possibly SmartLynx-related), low confidence
-la  	americas 	active 	americas 	false      	LATAM Airlines
-lg  	europe   	active 	europe   	false      	Luxair
-lh  	europe   	active 	europe   	true       	Lufthansa                                                          	Serves Singapore
-lj  	asia     	active 	asia     	false      	Jin Air                                                            	Korean LCC, SG route unconfirmed
-ll  	defunct  	defunct	americas 	false      	Miami Air International                                            	Charter carrier, ceased operations 2020
-lm  	europe   	active 	europe   	false      	Loganair                                                           	UK regional
-lo  	europe   	active 	europe   	false      	LOT Polish Airlines
-lp  	americas 	active 	americas 	false      	LATAM Peru
-lr  	americas 	active 	americas 	false      	Avianca Costa Rica (LACSA)
-ls  	europe   	active 	europe   	false      	Jet2.com
-lu  	review   	unknown	americas 	false      	Alas Chiricanas                                                    	Small Panamanian carrier, uncertain current status
-lx  	europe   	active 	europe   	true       	Swiss International Air Lines                                      	Serves Singapore
-ly  	africa_me	active 	africa_me	false      	El Al
-me  	africa_me	active 	africa_me	false      	Middle East Airlines                                               	Lebanon
-mf  	asia     	active 	asia     	true       	Xiamen Airlines
-mh  	asia     	active 	asia     	true       	Malaysia Airlines
-mi  	defunct  	defunct	asia     	false      	SilkAir                                                            	Merged into Singapore Airlines 2021, brand retired
-mk  	africa_me	active 	africa_me	false      	Air Mauritius
-mm  	asia     	active 	asia     	false      	Peach Aviation                                                     	Japan LCC
-mp  	defunct  	defunct	europe   	false      	Martinair                                                          	Passenger ops ceased 2011; cargo brand absorbed into KLM Cargo
-mq  	americas 	active 	americas 	false      	Envoy Air                                                          	American Eagle regional
-ms  	africa_me	active 	africa_me	false      	EgyptAir
-mu  	asia     	active 	asia     	true       	China Eastern Airlines
-mx  	americas 	active 	americas 	false      	Mexicana (revived)                                                 	Relaunched 2023-2024 as state-owned carrier after 2010 bankruptcy
-mzn 	review   	unknown	americas 	false      	Unclear (reserved civil callsign, cancelled)                       	MZN was a reserved ICAO 3LD/callsign for a US aviation services company, cancelled 2021; not an active commercial airline
-n0  	review   	unknown	europe   	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-n3  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, possibly defunct Aerosur-related, low confidence
-n6  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-n8  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-nc  	americas 	active 	americas 	false      	Northern Air Cargo                                                 	Alaska-based cargo
-nh  	asia     	active 	asia     	true       	All Nippon Airways
-nk  	americas 	active 	americas 	false      	Spirit Airlines
-nu  	asia     	active 	asia     	false      	Japan Transocean Air                                               	JAL regional, Okinawa
-nw  	defunct  	defunct	americas 	false      	Northwest Airlines                                                 	Merged into Delta 2010
-nz  	oceania  	active 	oceania  	true       	Air New Zealand                                                    	Serves Singapore
-o6  	defunct  	defunct	americas 	false      	Avianca Brasil                                                     	Ceased operations 2019
-od  	defunct  	defunct	asia     	false      	Malindo Air                                                        	Rebranded to Batik Air Malaysia 2022, old brand retired
-oh  	americas 	active 	americas 	false      	PSA Airlines                                                       	American Eagle regional
-ok  	defunct  	defunct	europe   	false      	Czech Airlines                                                     	Ceased independent operations Oct 26 2024, absorbed into Smartwings
-oo  	americas 	active 	americas 	false      	SkyWest Airlines
-or  	europe   	active 	europe   	false      	TUI fly Netherlands
-os  	europe   	active 	europe   	false      	Austrian Airlines
-ou  	europe   	active 	europe   	false      	Croatia Airlines
-ow  	review   	unknown	africa_me	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-oy  	americas 	active 	americas 	true       	Omni Air International                                             	US charter, flies global/military charter routes including Asia
-oz  	asia     	active 	asia     	true       	Asiana Airlines
-p9  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-pa  	defunct  	defunct	americas 	false      	Pan Am                                                             	Original carrier ceased 1991; code has seen minor unrelated revivals
-pb  	americas 	active 	americas 	false      	PAL Airlines                                                       	Canadian regional (formerly Provincial Airlines)
-pc  	europe   	active 	europe   	false      	Pegasus Airlines                                                   	Turkey
-pd  	americas 	active 	americas 	false      	Porter Airlines
-pg  	asia     	active 	asia     	true       	Bangkok Airways
-ph  	review   	unknown	oceania  	false      	Polynesian Airlines                                                	Small Samoan carrier, uncertain current status
-pk  	asia     	active 	asia     	false      	Pakistan International Airlines                                    	No current Singapore service
-po  	americas 	active 	americas 	true       	Polar Air Cargo                                                    	US cargo, Asia routes
-pr  	asia     	active 	asia     	true       	Philippine Airlines
-ps  	europe   	active 	europe   	false      	Ukraine International Airlines                                     	Operations suspended since Feb 2022 due to war; airline entity not formally defunct
-pt  	americas 	active 	americas 	false      	Piedmont Airlines                                                  	American Eagle regional
-pu  	defunct  	defunct	americas 	false      	PLUNA                                                              	Uruguayan carrier, ceased operations 2012
-px  	oceania  	active 	oceania  	true       	Air Niugini                                                        	Flies Port Moresby-Singapore route
-pz  	americas 	active 	americas 	false      	LATAM Paraguay
-q6  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-qf  	oceania  	active 	oceania  	true       	Qantas                                                             	Serves Singapore
-qk  	americas 	active 	americas 	false      	Jazz Aviation                                                      	Air Canada Express
-qp  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-qq  	review   	unknown	oceania  	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-qr  	global   	active 	global   	true       	Qatar Airways
-qt  	americas 	active 	americas 	false      	Tampa Cargo                                                        	Colombian cargo (Avianca Cargo)
-qx  	americas 	active 	americas 	false      	Horizon Air
-qy  	europe   	active 	europe   	true       	European Air Transport Leipzig (DHL)                               	DHL cargo network
-qz  	asia     	active 	asia     	true       	Indonesia AirAsia
-rch 	review   	state  	americas 	false      	US Air Force Air Mobility Command                                  	Military callsign 'Reach'
-rfds	review   	state  	oceania  	false      	Royal Flying Doctor Service                                        	Australian government/charity air ambulance
-rh  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-rj  	africa_me	active 	africa_me	false      	Royal Jordanian
-rk  	review   	unknown	europe   	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-ro  	europe   	active 	europe   	false      	TAROM                                                              	Romania
-rr  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, possibly a defunct US charter carrier, low confidence
-rrr 	review   	state  	oceania  	false      	State/military operator (unconfirmed branch)                       	Grouped with military/government callsigns per icon set convention; exact branch unconfirmed
-s4  	europe   	active 	europe   	false      	Azores Airlines (SATA)
-s7  	europe   	active 	europe   	false      	S7 Airlines                                                        	Russia, limited international reach post-2022
-s8  	review   	unknown	asia     	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-sa  	africa_me	active 	africa_me	false      	South African Airways                                              	Restructured after 2020 business rescue, operating limited network
-sb  	oceania  	active 	oceania  	false      	Aircalin (Air Caledonie International)
-sg  	asia     	active 	asia     	false      	SpiceJet                                                           	Financially strained but operating scheduled flights as of 2026
-sh  	oceania  	active 	oceania  	false      	Sharp Airlines                                                     	Small Australian regional
-sk  	europe   	active 	europe   	false      	SAS Scandinavian Airlines                                          	No confirmed current direct Singapore route
-sl  	asia     	active 	asia     	false      	Thai Lion Air
-sn  	europe   	active 	europe   	false      	Brussels Airlines
-sq  	asia     	active 	asia     	true       	Singapore Airlines                                                 	Home carrier
-ss  	europe   	active 	europe   	false      	Corsair International
-su  	europe   	active 	europe   	false      	Aeroflot                                                           	Sanctioned/limited international reach since 2022
-sv  	africa_me	active 	africa_me	true       	Saudia                                                             	Serves Singapore
-sy  	americas 	active 	americas 	false      	Sun Country Airlines
-ta  	defunct  	defunct	americas 	false      	TACA (Avianca Central America)                                     	Brand retired, merged into Avianca ~2013
-tb  	europe   	active 	europe   	false      	TUI fly Belgium
-tfx 	review   	unknown	americas 	false      	Unknown/unidentified (possible state or business-aviation callsign)	3-letter code, no confident match found
-tg  	asia     	active 	asia     	true       	Thai Airways
-tk  	global   	active 	global   	true       	Turkish Airlines                                                   	Serves Singapore
-tl  	oceania  	active 	oceania  	false      	Airnorth                                                           	Australian regional
-tn  	oceania  	active 	oceania  	false      	Air Tahiti Nui
-to  	europe   	active 	europe   	false      	Transavia France
-tp  	europe   	active 	europe   	false      	TAP Air Portugal
-tr  	asia     	active 	asia     	true       	Scoot                                                              	Singapore-based, SIA subsidiary
-ts  	americas 	active 	americas 	false      	Air Transat
-tw  	asia     	active 	asia     	false      	T'way Air                                                          	Korean LCC, SG route unconfirmed
-u2  	europe   	active 	europe   	false      	easyJet
-ua  	americas 	active 	americas 	true       	United Airlines                                                    	Flies SFO-SIN route
-uc  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous historical code (possibly LADECO, Chile), low confidence
-uk  	defunct  	defunct	asia     	false      	Vistara                                                            	Merged into Air India Nov 2024, brand retired
-ul  	asia     	active 	asia     	true       	SriLankan Airlines
-uo  	asia     	active 	asia     	false      	Hong Kong Express                                                  	Regional LCC, SG route unconfirmed
-ups 	americas 	active 	americas 	true       	UPS Airlines (alt code entry)                                      	Duplicate/alt entry for UPS Airlines, see 5x
-us  	defunct  	defunct	americas 	false      	US Airways                                                         	Merged into American Airlines 2015
-ut  	europe   	active 	europe   	false      	UTair Aviation                                                     	Russia, limited international reach
-ux  	europe   	active 	europe   	false      	Air Europa
-v7  	europe   	active 	europe   	false      	Volotea
-va  	oceania  	active 	oceania  	false      	Virgin Australia                                                   	No confirmed current direct Singapore route
-vj  	asia     	active 	asia     	true       	VietJet Air
-vl  	review   	unknown	africa_me	false      	Med-View Airline                                                   	Nigerian carrier, uncertain current status
-vn  	asia     	active 	asia     	true       	Vietnam Airlines
-vo  	defunct  	defunct	europe   	false      	Tyrolean Airways                                                   	Merged into Austrian Airlines brand
-vs  	europe   	active 	europe   	false      	Virgin Atlantic                                                    	No current direct Singapore route
-vw  	americas 	active 	americas 	false      	Aeromar                                                            	Mexico
-vy  	europe   	active 	europe   	false      	Vueling
-vz  	asia     	active 	asia     	false      	Thai Vietjet Air
-w4  	africa_me	active 	africa_me	false      	Wizz Air Abu Dhabi
-w6  	europe   	active 	europe   	false      	Wizz Air
-w8  	americas 	active 	americas 	false      	Cargojet Airways                                                   	Canadian cargo
-w9  	europe   	active 	europe   	false      	Wizz Air UK
-wa  	europe   	active 	europe   	false      	KLM Cityhopper
-wg  	defunct  	defunct	americas 	false      	Sunwing Airlines                                                   	Ceased operations 2024, merged into WestJet
-wgn 	americas 	active 	americas 	true       	Western Global Airlines                                            	US cargo/charter operator (747 fleet), IATA code KD, ICAO/callsign WGN
-wk  	europe   	active 	europe   	false      	Edelweiss Air                                                      	Switzerland
-wn  	americas 	active 	americas 	false      	Southwest Airlines
-wr  	americas 	active 	americas 	false      	WestJet Encore
-ws  	americas 	active 	americas 	false      	WestJet
-wy  	africa_me	active 	africa_me	true       	Oman Air                                                           	Serves Singapore
-x3  	europe   	active 	europe   	false      	TUIfly Germany
-xe  	defunct  	defunct	americas 	false      	ExpressJet                                                         	Ceased operations 2022
-xj  	asia     	active 	asia     	true       	Thai AirAsia X
-xk  	europe   	active 	europe   	false      	CCM Airlines                                                       	Corse, France - small regional
-xl  	americas 	active 	americas 	false      	LATAM Ecuador                                                      	Note: XL Airways France (unrelated, defunct 2019) also historically used similar branding
-xm  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-xp  	review   	unknown	americas 	false      	Unknown/unidentified                                               	Ambiguous code, no confident match
-xq  	europe   	active 	europe   	false      	SunExpress                                                         	Turkey
-y4  	americas 	active 	americas 	false      	Volaris                                                            	Mexico
-yp  	asia     	active 	asia     	true       	Air Premia                                                         	Korean long-haul LCC, flies to Singapore
-yw  	europe   	active 	europe   	false      	Air Nostrum                                                        	Spain regional, Iberia Regional
-yx  	americas 	active 	americas 	false      	Republic Airways                                                   	US regional
-z0  	review   	unknown	asia     	false      	Unknown/unidentified                                               	No identifiable IATA airline code found
-z2  	defunct  	defunct	asia     	false      	Zest Air (legacy code)                                             	Legacy Zest Air code, superseded by 2P (Philippines AirAsia)
-zh  	asia     	active 	asia     	true       	Shenzhen Airlines
-zl  	oceania  	active 	oceania  	false      	Regional Express (Rex Airlines)                                    	Entered voluntary administration Jul 2024; regional flights continued; acquired by Air T, exiting administration ~Dec 2025
+00	global	state	global	true	Generic Aircraft (Default)	Default blank white tailfin silhouette, used as fallback for unassigned/general traffic
+1i	americas	active	americas	false	NetJets	US private business jet fractional fleet & charter
+2k	defunct	defunct	americas	false	Aerogal (Aerolineas Galapagos)	Merged into Avianca Ecuador in 2013, brand retired
+2l	europe	active	europe	false	Helvetic Airways	Swiss regional/charter carrier
+2p	asia	active	asia	false	Philippines AirAsia	Mostly Philippines domestic/regional
+2q	americas	active	americas	false	Air Cargo Carriers	US cargo airline based in Milwaukee, Wisconsin
+3k	asia	active	asia	true	Jetstar Asia	Singapore-based carrier
+3l	global	active	africa_me	false	Air Arabia Abu Dhabi	UAE low-cost carrier flying to Asia, Europe, Middle East
+3m	americas	active	americas	false	Silver Airways	US regional (Florida/Caribbean)
+3o	global	active	africa_me	false	Air Arabia Maroc	Morocco-based LCC subsidiary
+3u	global	active	asia	true	Sichuan Airlines	Major Chinese carrier, growing international network
+3v	global	active	europe	false	ASL Airlines Belgium	Cargo carrier
+3y	europe	active	europe	false	Yamal Airlines	Russian regional, limited international reach post-2022 sanctions
+4c	americas	active	americas	false	LATAM Colombia (ex-Aires)	
+4y	global	active	europe	false	Discover Airlines	German leisure carrier in Lufthansa Group flying to North America, Africa, Caribbean
+5h	defunct	defunct	africa_me	false	Fly540	Kenya-based carrier, ceased operations in 2022
+5j	asia	active	asia	true	Cebu Pacific	Philippines LCC, flies to Singapore
+5o	europe	active	europe	false	ASL Airlines France	Cargo carrier
+5t	americas	active	americas	false	Canadian North	Canadian regional
+5w	europe	active	europe	false	Wizz Air Malta	
+5x	global	active	americas	true	UPS Airlines	Global cargo, serves Asia hubs
+5y	global	active	americas	true	Atlas Air	Global cargo/charter
+6b	defunct	defunct	europe	false	Blue1	Finnish carrier, ceased operations 2016
+6e	global	active	asia	true	IndiGo	India's largest carrier, serves Singapore
+7c	asia	active	asia	true	Jeju Air	Korean LCC with SEA routes
+7g	asia	active	asia	false	Star Flyer	Japan domestic only
+8c	global	active	americas	true	Air Transport International (ATI)	Major US cargo airline operating 767 freighters for Amazon/DHL/military worldwide
+9c	asia	active	asia	true	Spring Airlines	Chinese LCC with some SEA routes
+9e	americas	active	americas	false	Endeavor Air	Delta Connection US regional
+9p	asia	active	asia	false	Fly Jinnah	Pakistani LCC, domestic/regional focus
+9t	americas	active	americas	false	Transwest Air	Canadian regional
+9w	defunct	defunct	asia	false	Jet Airways	Ceased ops 2019; relaunch attempts stalled, not commercially flying as of 2026
+a0	europe	active	europe	false	BA Euroflyer	British Airways Gatwick-based short-haul subsidiary
+a3	global	active	europe	false	Aegean Airlines	
+a5	defunct	defunct	europe	false	HOP! (Air France)	Brand retired 2021, absorbed into Air France
+aa	global	active	americas	false	American Airlines	Major US carrier, no direct Singapore route
+ab	defunct	defunct	europe	false	Air Berlin	Ceased operations 2017
+ac	global	active	americas	false	Air Canada	No direct Singapore route
+ad	global	active	americas	false	Azul Brazilian Airlines	
+adb	global	active	europe	false	Antonov Airlines	Ukrainian heavy-lift cargo operator (state design bureau), callsign ADB
+af	global	active	europe	true	Air France	Serves Singapore
+ai	global	active	asia	true	Air India	
+ak	asia	active	asia	true	AirAsia	Malaysia-based, major SG connectivity
+am	global	active	americas	false	Aeromexico	
+an	defunct	defunct	oceania	false	Ansett Australia	Ceased operations 2001
+ao	defunct	defunct	oceania	false	Australian Air Express	Australian cargo airline, merged into Qantas Freight
+ar	global	active	americas	false	Aerolineas Argentinas	
+as	americas	active	americas	false	Alaska Airlines	
+asy	oceania	state	oceania	false	Royal Australian Air Force (RAAF)	Military callsign ASY / AUSSIE
+at	global	active	africa_me	false	Royal Air Maroc	
+av	global	active	americas	false	Avianca	
+ax	defunct	defunct	americas	false	Trans States Airlines	Ceased operations 2020
+ay	global	active	europe	false	Finnair	No current direct Singapore route
+az	global	active	europe	false	ITA Airways	Successor to Alitalia
+b6	global	active	americas	false	JetBlue	
+ba	global	active	europe	true	British Airways	Serves Singapore
+bc	asia	active	asia	false	Skymark Airlines	Japan domestic
+bd	defunct	defunct	europe	false	bmi (British Midland)	Ceased operations 2012
+be	defunct	defunct	europe	false	Flybe	Ceased 2020, brief relaunch failed again 2023
+bf	global	active	europe	false	French Bee	
+bi	global	active	asia	true	Royal Brunei Airlines	Regional neighbor, flies near/to Singapore
+br	global	active	asia	true	EVA Air	Major Taiwanese carrier, serves Singapore
+bs	asia	active	asia	false	US-Bangla Airlines	
+bt	europe	active	europe	false	airBaltic	
+bw	americas	active	americas	false	Caribbean Airlines	
+by	global	active	europe	false	TUI Airways	
+bz	europe	active	europe	false	Bluebird Airways	Greek scheduled & charter carrier based in Heraklion, Crete
+c5	americas	active	americas	false	CommutAir	US regional
+c8	global	active	europe	false	Cargolux Italia	Italian cargo airline based in Milan Malpensa, operating 747 freighters to Asia/Americas
+ca	global	active	asia	true	Air China	
+cc	global	active	europe	false	Air Atlanta Icelandic	Charter/ACMI wet-lease carrier
+cfc	americas	state	americas	false	Royal Canadian Air Force	Military callsign CFC / CANFORCE
+ci	global	active	asia	true	China Airlines	
+ck	global	active	asia	true	China Cargo Airlines	
+cl	europe	active	europe	false	Lufthansa CityLine	
+cm	americas	active	americas	false	Copa Airlines	
+cp	defunct	defunct	americas	false	Compass Airlines	Ceased operations 2020
+cul	global	active	americas	false	Coulson Aviation	US/Canada aerial firefighting operating globally including Australia bushfire seasons
+cv	global	active	europe	true	Cargolux	Major global cargo carrier, serves Asia
+cx	global	active	asia	true	Cathay Pacific	
+cz	global	active	asia	true	China Southern Airlines	
+d0	global	active	europe	true	DHL Air UK	UK-based DHL long-haul cargo carrier (777/767 fleet)
+d5	global	active	americas	false	DHL Aero Expreso	Panama-based DHL cargo airline operating across Americas
+d7	global	active	asia	true	AirAsia X	Long-haul LCC from Malaysia
+d8	europe	active	europe	false	Norwegian Air Sweden	
+dd	asia	active	asia	false	Nok Air	Thailand domestic
+de	global	active	europe	false	Condor	
+dh	defunct	defunct	americas	false	Independence Air	US carrier, ceased 2006; code may have been reused since
+dj	defunct	defunct	oceania	false	Virgin Australia (Virgin Blue)	Legacy IATA code DJ for Virgin Blue, rebranded to VA
+dl	global	active	americas	false	Delta Air Lines	No direct Singapore route
+ds	europe	active	europe	false	easyJet Switzerland	
+dx	europe	active	europe	false	Danish Air Transport	
+dy	europe	active	europe	false	Norwegian Air Shuttle	
+e4	europe	active	europe	false	Enter Air	Polish charter carrier
+e5	global	active	africa_me	false	Air Arabia Egypt	Code previously used by Samara Airlines (defunct)
+e6	europe	active	europe	false	Eurowings Europe Limited	Malta-based subsidiary of Lufthansa Group / Eurowings
+ea	defunct	defunct	americas	false	Eastern Airlines (revived brand)	Revived-brand carrier that ceased operations again ~2020
+eb	global	active	europe	false	Wamos Air	Spanish charter carrier
+ec	europe	active	europe	false	easyJet Europe	Austrian-registered European subsidiary of easyJet
+eh	asia	active	asia	false	ANA Wings	ANA regional subsidiary
+ei	global	active	europe	false	Aer Lingus	
+ek	global	active	global	true	Emirates	
+en	europe	active	europe	false	Air Dolomiti	Lufthansa regional (Italy)
+es	defunct	defunct	europe	false	Estonian Air	Ceased operations 2015
+et	global	active	global	true	Ethiopian Airlines	Serves Singapore
+ew	europe	active	europe	false	Eurowings	
+ey	global	active	global	true	Etihad Airways	
+f8	americas	active	americas	false	Flair Airlines	Canadian LCC
+f9	americas	active	americas	false	Frontier Airlines	
+fc	americas	active	americas	false	Pacific Coastal Airlines	Canadian regional
+fd	asia	active	asia	true	Thai AirAsia	
+fi	global	active	europe	false	Icelandair	
+fj	global	active	oceania	true	Fiji Airways	Flies Singapore-Nadi route
+fr	europe	active	europe	false	Ryanair	
+fx	global	active	americas	true	FedEx Express	Global cargo, Asia/SG presence
+fz	global	active	africa_me	false	flydubai	No direct Singapore route currently
+g3	americas	active	americas	false	Gol Linhas Aereas	
+g4	americas	active	americas	false	Allegiant Air	
+g7	americas	active	americas	false	GoJet Airlines	US regional
+g9	global	active	africa_me	false	Air Arabia	UAE LCC
+ga	global	active	asia	true	Garuda Indonesia	
+gaf	europe	state	europe	false	German Air Force (Luftwaffe)	Military callsign GAF / GERMAN AIR FORCE
+gb	global	active	americas	false	ABX Air	US cargo, mostly domestic
+gf	global	active	africa_me	true	Gulf Air	Serves Singapore
+gk	asia	active	asia	false	Jetstar Japan	
+gl	global	active	europe	false	Air Greenland	
+gu	defunct	defunct	americas	false	Aviateca	Guatemalan brand retired, absorbed into Avianca
+ha	global	active	americas	false	Hawaiian Airlines	
+hb	asia	active	asia	false	Greater Bay Airlines	Newer Hong Kong carrier, regional focus
+hd	asia	active	asia	false	Air Do	Japan domestic
+hk	asia	active	asia	false	Yangon Airways	Myanmar domestic airline
+ho	global	active	asia	false	Juneyao Airlines	Chinese carrier; SG route unconfirmed
+hu	global	active	asia	true	Hainan Airlines	
+hv	europe	active	europe	false	Transavia	
+hx	asia	active	asia	true	Hong Kong Airlines	
+hy	global	active	asia	false	Uzbekistan Airways	
+i2	europe	active	europe	false	Iberia Express	
+ib	global	active	europe	false	Iberia	
+id	asia	active	asia	true	Batik Air	Indonesian carrier serving Singapore
+ir	global	active	africa_me	false	Iran Air	
+it	defunct	defunct	asia	false	Kingfisher Airlines	Ceased operations 2012
+iw	asia	active	asia	false	Wings Air	Indonesian regional (Lion Group)
+j2	global	active	europe	false	Azerbaijan Airlines	
+j4	africa_me	active	africa_me	false	Badr Airlines	Sudanese airline based in Khartoum
+j9	global	active	africa_me	false	Jazeera Airways	Kuwait LCC
+jc	asia	active	asia	false	Japan Air Commuter	JAL regional subsidiary
+jj	global	active	americas	false	LATAM Brasil	Formerly TAM
+jl	global	active	asia	true	Japan Airlines	
+jm	defunct	defunct	americas	false	Air Jamaica	Absorbed into Caribbean Airlines 2015
+jo	defunct	defunct	oceania	false	JetGo Australia	Ceased operations 2019
+jq	global	active	oceania	true	Jetstar Airways	Serves Singapore
+jt	asia	active	asia	true	Lion Air	
+ju	global	active	europe	false	Air Serbia	
+jx	global	active	asia	true	Starlux Airlines	Taiwanese carrier serving Singapore
+k4	global	active	americas	true	Kalitta Air	Global cargo/charter
+kc	global	active	asia	false	Air Astana	Kazakhstan
+kda	defunct	defunct	oceania	false	Kendell Airlines	Australian regional carrier, ceased operations 2005
+ke	global	active	asia	true	Korean Air	
+ki	defunct	defunct	asia	false	Adam Air	Indonesian low-cost carrier, ceased operations 2008
+kl	global	active	europe	true	KLM	Serves Singapore
+kn	asia	active	asia	false	China United Airlines	
+kq	global	active	africa_me	false	Kenya Airways	
+kt	asia	active	asia	true	AirAsia Cambodia	Cambodian LCC subsidiary of Capital A / AirAsia Group
+ku	global	active	africa_me	false	Kuwait Airways	
+l3	americas	active	americas	false	DHL de Guatemala	Guatemalan cargo airline operating for DHL Aviation
+la	global	active	americas	false	LATAM Airlines	
+lg	europe	active	europe	false	Luxair	
+lh	global	active	europe	true	Lufthansa	Serves Singapore
+lj	asia	active	asia	false	Jin Air	Korean LCC, SG route unconfirmed
+ll	defunct	defunct	americas	false	Miami Air International	Charter carrier, ceased operations 2020
+lm	europe	active	europe	false	Loganair	UK regional
+lo	global	active	europe	false	LOT Polish Airlines	
+lp	global	active	americas	false	LATAM Peru	
+lr	americas	active	americas	false	Avianca Costa Rica (LACSA)	
+ls	europe	active	europe	false	Jet2.com	
+lu	americas	active	americas	false	LATAM Express	Chilean domestic & regional subsidiary of LATAM Airlines
+lx	global	active	europe	true	Swiss International Air Lines	Serves Singapore
+ly	global	active	africa_me	false	El Al	
+me	global	active	africa_me	false	Middle East Airlines	Lebanon
+mf	global	active	asia	true	Xiamen Airlines	
+mh	global	active	asia	true	Malaysia Airlines	
+mi	defunct	defunct	asia	false	SilkAir	Merged into Singapore Airlines 2021, brand retired
+mk	global	active	africa_me	false	Air Mauritius	
+mm	asia	active	asia	false	Peach Aviation	Japan LCC
+mp	defunct	defunct	europe	false	Martinair	Passenger ops ceased 2011; cargo brand absorbed into KLM Cargo
+mq	americas	active	americas	false	Envoy Air	American Eagle regional
+ms	global	active	africa_me	false	EgyptAir	
+mu	global	active	asia	true	China Eastern Airlines	
+mx	americas	active	americas	false	Mexicana (revived)	Relaunched 2023-2024 as state-owned carrier after 2010 bankruptcy
+mzn	global	active	americas	true	Amazon Air	US cargo airline network operating for Amazon Prime Air (ICAO: MZN / AMAZON)
+n0	global	active	europe	false	Norse Atlantic Airways	Norwegian transatlantic long-haul low-cost carrier
+n3	americas	active	americas	false	Volaris El Salvador	Salvadoran ultra-low-cost subsidiary of Volaris
+n6	defunct	defunct	americas	false	Nuevo Continente (Aero Continente)	Peruvian airline, ceased operations
+n8	global	active	americas	true	National Airlines	US passenger & cargo airline operating 747/757 fleet worldwide
+nc	americas	active	americas	false	Northern Air Cargo	Alaska-based cargo
+nh	global	active	asia	true	All Nippon Airways	
+nk	americas	active	americas	false	Spirit Airlines	
+nu	asia	active	asia	false	Japan Transocean Air	JAL regional, Okinawa
+nw	defunct	defunct	americas	false	Northwest Airlines	Merged into Delta 2010
+nz	global	active	oceania	true	Air New Zealand	Serves Singapore
+o6	defunct	defunct	americas	false	Avianca Brasil	Ceased operations 2019
+od	defunct	defunct	asia	false	Malindo Air	Rebranded to Batik Air Malaysia 2022, old brand retired
+oh	americas	active	americas	false	PSA Airlines	American Eagle regional
+ok	defunct	defunct	europe	false	Czech Airlines	Ceased independent operations Oct 26 2024, absorbed into Smartwings
+oo	americas	active	americas	false	SkyWest Airlines	
+or	global	active	europe	false	TUI fly Netherlands	
+os	global	active	europe	false	Austrian Airlines	
+ou	europe	active	europe	false	Croatia Airlines	
+ow	africa_me	active	africa_me	false	Skyward Express	Kenyan domestic & regional passenger airline based in Nairobi
+oy	global	active	americas	true	Omni Air International	US charter, flies global/military charter routes including Asia
+oz	global	active	asia	true	Asiana Airlines	
+p9	defunct	defunct	americas	false	Peruvian Airlines	Peruvian carrier, ceased operations 2019
+pa	defunct	defunct	americas	false	Pan Am	Original carrier ceased 1991; code has seen minor unrelated revivals
+pb	americas	active	americas	false	PAL Airlines	Canadian regional (formerly Provincial Airlines)
+pc	global	active	europe	false	Pegasus Airlines	Turkey
+pd	americas	active	americas	false	Porter Airlines	
+pg	asia	active	asia	true	Bangkok Airways	
+ph	defunct	defunct	oceania	false	Polynesian Airlines	Samoan state airline, rebranded to Samoa Airways
+pk	global	active	asia	false	Pakistan International Airlines	No current Singapore service
+po	global	active	americas	true	Polar Air Cargo	US cargo, Asia routes
+pr	global	active	asia	true	Philippine Airlines	
+ps	europe	active	europe	false	Ukraine International Airlines	Operations suspended since Feb 2022 due to war; airline entity not formally defunct
+pt	americas	active	americas	false	Piedmont Airlines	American Eagle regional
+pu	defunct	defunct	americas	false	PLUNA	Uruguayan carrier, ceased operations 2012
+px	global	active	oceania	true	Air Niugini	Flies Port Moresby-Singapore route
+pz	americas	active	americas	false	LATAM Paraguay	
+q6	americas	active	americas	false	Volaris Costa Rica	Costa Rican ultra-low-cost subsidiary of Volaris
+qf	global	active	oceania	true	Qantas	Serves Singapore
+qk	americas	active	americas	false	Jazz Aviation	Air Canada Express
+qp	asia	active	asia	true	Akasa Air	Major Indian low-cost carrier, rapidly expanding international network
+qq	oceania	active	oceania	false	Alliance Airlines	Major Australian regional & charter airline operating Fokker/Embraer fleet
+qr	global	active	global	true	Qatar Airways	
+qt	global	active	americas	false	Tampa Cargo	Colombian cargo (Avianca Cargo)
+qx	americas	active	americas	false	Horizon Air	
+qy	global	active	europe	true	European Air Transport Leipzig (DHL)	DHL cargo network
+qz	global	active	asia	true	Indonesia AirAsia	
+rch	americas	state	americas	false	US Air Force Air Mobility Command	Military transport callsign RCH / REACH
+rfds	oceania	state	oceania	false	Royal Flying Doctor Service	Australian emergency aeromedical & primary health service
+rh	global	active	asia	true	Hong Kong Air Cargo	Major Hong Kong-based all-cargo carrier flying intercontinental routes
+rj	global	active	africa_me	false	Royal Jordanian	
+rk	europe	active	europe	false	Ryanair UK	UK-based operating subsidiary of Ryanair
+ro	europe	active	europe	false	TAROM	Romania
+rr	europe	state	europe	false	Royal Air Force (RAF)	UK Royal Air Force military air transport callsign ASCOT
+rrr	europe	state	europe	false	Royal Air Force (RAF)	UK Royal Air Force military air transport callsign ASCOT
+s4	global	active	europe	false	Azores Airlines (SATA)	
+s7	global	active	europe	false	S7 Airlines	Russia, limited international reach post-2022
+s8	oceania	active	oceania	false	Sounds Air	New Zealand regional airline connecting North and South Islands
+sa	global	active	africa_me	false	South African Airways	Restructured after 2020 business rescue, operating limited network
+sb	global	active	oceania	false	Aircalin (Air Caledonie International)	
+sg	asia	active	asia	false	SpiceJet	Financially strained but operating scheduled flights as of 2026
+sh	oceania	active	oceania	false	Sharp Airlines	Small Australian regional
+sk	global	active	europe	false	SAS Scandinavian Airlines	No confirmed current direct Singapore route
+sl	asia	active	asia	false	Thai Lion Air	
+sn	global	active	europe	false	Brussels Airlines	
+sq	global	active	asia	true	Singapore Airlines	Home carrier
+ss	global	active	europe	false	Corsair International	
+su	global	active	europe	false	Aeroflot	Sanctioned/limited international reach since 2022
+sv	global	active	africa_me	true	Saudia	Serves Singapore
+sy	americas	active	americas	false	Sun Country Airlines	
+ta	defunct	defunct	americas	false	TACA (Avianca Central America)	Brand retired, merged into Avianca ~2013
+tb	global	active	europe	false	TUI fly Belgium	
+tfx	oceania	active	oceania	false	Team Global Express (Toll Aviation)	Australian freight airline & logistics operator (ICAO: TFX / TEAM AIR)
+tg	global	active	asia	true	Thai Airways	
+tk	global	active	global	true	Turkish Airlines	Serves Singapore
+tl	oceania	active	oceania	false	Airnorth	Australian regional
+tn	global	active	oceania	false	Air Tahiti Nui	
+to	europe	active	europe	false	Transavia France	
+tp	global	active	europe	false	TAP Air Portugal	
+tr	global	active	asia	true	Scoot	Singapore-based, SIA subsidiary
+ts	global	active	americas	false	Air Transat	
+tw	global	active	asia	false	T'way Air	Korean LCC, SG route unconfirmed
+u2	europe	active	europe	false	easyJet	
+ua	global	active	americas	true	United Airlines	Flies SFO-SIN route
+uc	global	active	americas	false	LATAM Cargo Chile	Major South American cargo airline operating 767s across Americas & Europe
+uk	defunct	defunct	asia	false	Vistara	Merged into Air India Nov 2024, brand retired
+ul	global	active	asia	true	SriLankan Airlines	
+uo	asia	active	asia	false	Hong Kong Express	Regional LCC, SG route unconfirmed
+ups	global	active	americas	true	UPS Airlines (alt code entry)	Duplicate/alt entry for UPS Airlines, see 5x
+us	defunct	defunct	americas	false	US Airways	Merged into American Airlines 2015
+ut	europe	active	europe	false	UTair Aviation	Russia, limited international reach
+ux	global	active	europe	false	Air Europa	
+v7	europe	active	europe	false	Volotea	
+va	global	active	oceania	false	Virgin Australia	No confirmed current direct Singapore route
+vj	global	active	asia	true	VietJet Air	
+vl	europe	active	europe	false	Lufthansa City Airlines	German feeder airline subsidiary in Lufthansa Group (LHX)
+vn	global	active	asia	true	Vietnam Airlines	
+vo	defunct	defunct	europe	false	Tyrolean Airways	Merged into Austrian Airlines brand
+vs	global	active	europe	false	Virgin Atlantic	No current direct Singapore route
+vw	defunct	defunct	americas	false	Aeromar	Mexican regional carrier, ceased operations February 2023
+vy	europe	active	europe	false	Vueling	
+vz	asia	active	asia	false	Thai Vietjet Air	
+w4	global	active	africa_me	false	Wizz Air Abu Dhabi	
+w6	global	active	europe	false	Wizz Air	
+w8	global	active	americas	false	Cargojet Airways	Canadian cargo
+w9	europe	active	europe	false	Wizz Air UK	
+wa	europe	active	europe	false	KLM Cityhopper	
+wg	defunct	defunct	americas	false	Sunwing Airlines	Ceased operations 2024, merged into WestJet
+wgn	global	active	americas	true	Western Global Airlines	US cargo/charter operator (747 fleet), IATA code KD, ICAO/callsign WGN
+wk	global	active	europe	false	Edelweiss Air	Switzerland
+wn	americas	active	americas	false	Southwest Airlines	
+wr	americas	active	americas	false	WestJet Encore	
+ws	global	active	americas	false	WestJet	
+wy	global	active	africa_me	true	Oman Air	Serves Singapore
+x3	global	active	europe	false	TUIfly Germany	
+xe	defunct	defunct	americas	false	ExpressJet	Ceased operations 2022
+xj	global	active	asia	true	Thai AirAsia X	
+xk	europe	active	europe	false	CCM Airlines	Corse, France - small regional
+xl	americas	active	americas	false	LATAM Ecuador	Note: XL Airways France (unrelated, defunct 2019) also historically used similar branding
+xm	global	active	europe	false	Zimex Aviation	Swiss charter, utility and cargo airline operating worldwide
+xp	americas	active	americas	false	Avelo Airlines	US ultra-low-cost airline based in Houston/Burbank/New Haven
+xq	europe	active	europe	false	SunExpress	Turkey
+y4	americas	active	americas	false	Volaris	Mexico
+yp	global	active	asia	true	Air Premia	Korean long-haul LCC, flies to Singapore
+yw	europe	active	europe	false	Air Nostrum	Spain regional, Iberia Regional
+yx	americas	active	americas	false	Republic Airways	US regional
+z0	global	active	europe	false	Norse Atlantic UK	UK-based transatlantic low-cost carrier operating out of London Gatwick
+z2	defunct	defunct	asia	false	Zest Air (legacy code)	Legacy Zest Air code, superseded by 2P (Philippines AirAsia)
+zh	global	active	asia	true	Shenzhen Airlines	
+zl	oceania	active	oceania	false	Regional Express (Rex Airlines)	Entered voluntary administration Jul 2024; regional flights continued; acquired by Air T, exiting administration ~Dec 2025
