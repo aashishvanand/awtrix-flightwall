@@ -95,17 +95,42 @@ venv/bin/python convert_tiles.py --mode tight    # Strict bounding box
 
 Output filenames follow `{iata-lowercase}_logo.gif`, e.g. `tailfin/SQ.webp` ->
 `icons/sq_logo.gif`. Re-run any time you add new files to `tailfin/` — it processes
-the whole folder.
+the whole folder. Newly generated icons land flat in `icons/`; sort them into the
+region subfolders below before uploading (see `icons/classification.txt`).
 
-### 2. `upload_icons.sh`
+### 2. `icons/` layout — region subfolders
 
-Bulk-uploads everything in `icons/` to the clock via AWTRIX NG's file API
-(`POST /api/v1/files?dir=/ICONS`).
+`icons/` is split into subfolders so a single clock only has to carry the
+airlines it will realistically see:
+
+```
+icons/
+├── asia/        africa_me/   americas/   europe/   oceania/   global/   # active carriers, by primary region
+│                                                                         # (global = long-haul flag carriers worth keeping everywhere, e.g. Emirates, Qatar)
+├── defunct/     # confirmed ceased-operations / merged-away brands — kept as files, just excluded from uploads
+├── review/      # unidentified codes, or military/government ADS-B callsigns (not commercial airlines)
+└── classification.txt   # code -> {status, continent, sg_relevant, note} — the research behind this split
+```
+
+**Why this exists:** LittleFS allocates a fixed minimum block per file
+regardless of how small it is. A 4MB board's ~512KB partition filled up at
+347 tiny icons even though the actual image data was only ~77KB — file
+*count* is the real budget, not byte size. `classification.txt` records the
+status/continent call for all 319 known codes so a future cleanup pass
+doesn't have to re-research every airline from scratch — update that file
+by hand (or regenerate it) whenever you add or reclassify a code.
+
+### 3. `upload_icons.sh`
+
+Uploads a chosen set of region subfolders to the clock via AWTRIX NG's file
+API (`POST /api/v1/files?dir=/ICONS`). `defunct/` and `review/` are never
+uploaded, even with the default region list.
 
 ```bash
-./upload_icons.sh           # Uploads only new or modified icons (cached via .upload_state.json)
-./upload_icons.sh --force   # Force re-uploads ALL icons to AWTRIX (useful after clock reset)
-./upload_icons.sh --clean   # Clears local upload state cache file
+./upload_icons.sh                       # Uploads all six regions (asia, europe, americas, africa_me, oceania, global)
+./upload_icons.sh --regions asia,global # Only Asia + long-haul global carriers, e.g. a Singapore-based clock
+./upload_icons.sh --force               # Force re-uploads ALL icons in the selected regions (useful after clock reset)
+./upload_icons.sh --clean               # Clears local upload state cache file
 ```
 
 Set `CLOCK_IP` at the top of the script (or run `CLOCK_IP=192.168.x.x ./upload_icons.sh`).
@@ -115,10 +140,11 @@ ESPAsyncWebServer's `SPIFFSEditor` at `/edit`, needing the destination path
 embedded in the multipart `filename` field), NG uses a proper REST endpoint —
 the target directory is a `?dir=` query param and the uploaded filename
 (minus extension) becomes the icon's ID, e.g. `sq_logo.gif` → icon `sq_logo`.
-The filesystem partition on a 4MB board is small (~512KB) but each icon here
-is under 300 bytes, so hundreds fit comfortably. Uploading in a tight loop can
-transiently stress the device's heap — the script uploads one file at a time,
-which has worked reliably.
+The filesystem partition on a 4MB board is small (~512KB), and each icon
+here costs roughly one filesystem block (~1.3KB) regardless of its own
+~250-byte size — so it's file count, not KB, that determines how many fit.
+Uploading in a tight loop can transiently stress the device's heap — the
+script uploads one file at a time, which has worked reliably.
 
 ## n8n workflow
 
@@ -168,7 +194,7 @@ imports inactive by default.
 ├── upload_icons.sh           # bulk-upload icons/ to the clock
 ├── n8n_aircraft_workflow.json # importable n8n workflow (secrets scrubbed)
 ├── tailfin/                  # source airline tail logos (gitignored — see below)
-└── icons/                    # generated 8x8 icons — airline logos
+└── icons/                    # generated 8x8 icons — airline logos, sorted into region subfolders
 ```
 
 ## Before you publish this repo

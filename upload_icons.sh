@@ -4,12 +4,21 @@ set -euo pipefail
 CLOCK_IP="${CLOCK_IP:-YOUR_CLOCK_IP}"
 ICONS_DIR="./icons"
 STATE_FILE="./.upload_state.json"
+ALL_REGIONS="asia europe americas africa_me oceania global"
+REGIONS=""
 
 FORCE=0
-for arg in "$@"; do
+args=("$@")
+i=0
+while [ $i -lt ${#args[@]} ]; do
+  arg="${args[$i]}"
   case "$arg" in
     -f|--force)
       FORCE=1
+      ;;
+    --regions)
+      i=$((i+1))
+      REGIONS="${args[$i]//,/ }"
       ;;
     --clean)
       rm -f "$STATE_FILE"
@@ -20,14 +29,37 @@ for arg in "$@"; do
       echo "Usage: $0 [options]"
       echo ""
       echo "Bulk uploads icons in $ICONS_DIR to an AWTRIX NG clock at $CLOCK_IP."
+      echo "icons/ is split into subfolders: $ALL_REGIONS, plus defunct/ and review/"
+      echo "(defunct/review are never uploaded, even with --regions all)."
       echo ""
       echo "Options:"
-      echo "  -f, --force    Force re-upload all icons regardless of state file"
-      echo "  --clean        Reset/delete local upload state file ($STATE_FILE)"
-      echo "  -h, --help     Show this help message"
+      echo "  --regions <list>  Comma-separated subfolders to upload (default: all six above)."
+      echo "                    e.g. --regions asia,global for a Singapore-based clock."
+      echo "  -f, --force       Force re-upload all icons regardless of state file"
+      echo "  --clean           Reset/delete local upload state file ($STATE_FILE)"
+      echo "  -h, --help        Show this help message"
       exit 0
       ;;
   esac
+  i=$((i+1))
+done
+
+if [ -z "$REGIONS" ]; then
+  REGIONS="$ALL_REGIONS"
+fi
+
+for r in $REGIONS; do
+  case " $ALL_REGIONS " in
+    *" $r "*) ;;
+    *)
+      echo "Error: unknown region '$r'. Valid regions: $ALL_REGIONS"
+      exit 1
+      ;;
+  esac
+  if [ ! -d "$ICONS_DIR/$r" ]; then
+    echo "Error: $ICONS_DIR/$r does not exist."
+    exit 1
+  fi
 done
 
 if [ "$CLOCK_IP" = "YOUR_CLOCK_IP" ]; then
@@ -43,9 +75,9 @@ fail=0
 skipped=0
 
 if [ "$FORCE" -eq 1 ]; then
-  echo "Force upload enabled: re-uploading all icons to AWTRIX (${CLOCK_IP})..."
+  echo "Force upload enabled: re-uploading icons from [$REGIONS] to AWTRIX (${CLOCK_IP})..."
 else
-  echo "Uploading icons to AWTRIX (${CLOCK_IP})..."
+  echo "Uploading icons from [$REGIONS] to AWTRIX (${CLOCK_IP})..."
 fi
 
 tmp_state=$(mktemp)
@@ -59,13 +91,14 @@ python3 -c "
 import os, glob, hashlib, json
 
 icons_dir = '$ICONS_DIR'
+regions = '$REGIONS'.split()
 state_file = '$tmp_state'
 force = bool($FORCE)
 
 with open(state_file) as fh:
     state = json.load(fh)
 
-files = sorted(glob.glob(os.path.join(icons_dir, '*.gif')))
+files = sorted(f for r in regions for f in glob.glob(os.path.join(icons_dir, r, '*.gif')))
 to_upload = []
 skipped_count = 0
 
