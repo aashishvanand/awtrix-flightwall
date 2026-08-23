@@ -1,6 +1,9 @@
 # secrets
 .env
 
+# Personal n8n workflow configs (contain home coordinates / clock IP)
+*_workflow.local.json
+
 # macOS
 .DS_Store
 
@@ -16,3 +19,6 @@ logo/
 
 #image
 tailfin/
+
+.claude
+venv

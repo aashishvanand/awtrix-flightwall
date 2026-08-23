@@ -19,7 +19,7 @@ for arg in "$@"; do
     -h|--help)
       echo "Usage: $0 [options]"
       echo ""
-      echo "Bulk uploads icons in $ICONS_DIR to AWTRIX light clock at $CLOCK_IP."
+      echo "Bulk uploads icons in $ICONS_DIR to an AWTRIX NG clock at $CLOCK_IP."
       echo ""
       echo "Options:"
       echo "  -f, --force    Force re-upload all icons regardless of state file"
@@ -92,8 +92,8 @@ if [ -f "$list_tmp" ]; then
   while IFS=$'\t' read -r f name hash; do
     [ -z "$f" ] && continue
     if curl -s -f --max-time 10 \
-        -F "data=@${f};filename=/ICONS/${name}" \
-        "http://${CLOCK_IP}/edit" -o /dev/null; then
+        -F "file=@${f}" \
+        "http://${CLOCK_IP}/api/v1/files?dir=/ICONS" -o /dev/null; then
       echo "OK   $name"
       ok=$((ok+1))
       python3 -c "
