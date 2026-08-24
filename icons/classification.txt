@@ -211,7 +211,7 @@ nu	asia	active	asia	false	Japan Transocean Air	JAL regional, Okinawa
 nw	defunct	defunct	americas	false	Northwest Airlines	Merged into Delta 2010
 nz	global	active	oceania	true	Air New Zealand	Serves Singapore
 o6	defunct	defunct	americas	false	Avianca Brasil	Ceased operations 2019
-od	defunct	defunct	asia	false	Malindo Air	Rebranded to Batik Air Malaysia 2022, old brand retired
+od	asia	active	asia	false	Malindo Air	Rebranded to Batik Air Malaysia 2022, but ADS-B/adsbdb still returns old Malindo branding for OD/MXD flights (e.g. MXD801)
 oh	americas	active	americas	false	PSA Airlines	American Eagle regional
 ok	defunct	defunct	europe	false	Czech Airlines	Ceased independent operations Oct 26 2024, absorbed into Smartwings
 oo	americas	active	americas	false	SkyWest Airlines	
