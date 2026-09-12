@@ -8,13 +8,13 @@ INPUT_FOLDER = "./tailfin"       # folder of source .webp tail logos, named by I
 OUTPUT_FOLDER = "./icons"        # where the converted 8x8 .gif files go
 
 
-def convert(path, out_path, mode="emblem"):
+def convert(path, out_path, mode="emblem", size=8):
     """
-    Converts a source tail logo (.webp) into a high-quality, crisp 8x8 GIF icon for AWTRIX.
-    
+    Converts a source tail logo (.webp) into a high-quality, crisp NxN GIF icon.
+
     Modes:
       - 'emblem': Smart emblem focus (default). Zooms into the actual logo mark inside the tailfin,
-                  making symbols (birds, cranes, flags, kapok flowers) large and legible on an 8x8 display.
+                  making symbols (birds, cranes, flags, kapok flowers) large and legible on the display.
       - 'fin':    Smart tailfin. Preserves the full tailfin shape while trimming empty margins and centering.
       - 'tight':  Strict bounding box crop of non-transparent content.
     """
@@ -75,9 +75,9 @@ def convert(path, out_path, mode="emblem"):
     black_bg = Image.new("RGBA", cropped.size, (0, 0, 0, 255))
     flat = Image.alpha_composite(black_bg, cropped).convert("RGB")
 
-    # 4. Aspect-ratio preserving target dimensions (fit within 8x8 max)
+    # 4. Aspect-ratio preserving target dimensions (fit within size x size max)
     w, h = flat.size
-    scale = min(8.0 / w, 8.0 / h)
+    scale = min(size / w, size / h)
     target_w = max(1, int(round(w * scale)))
     target_h = max(1, int(round(h * scale)))
 
@@ -91,10 +91,10 @@ def convert(path, out_path, mode="emblem"):
     mid = mid.filter(ImageFilter.UnsharpMask(radius=1.1, percent=150, threshold=1))
     small = mid.resize((target_w, target_h), Image.Resampling.BOX)
 
-    # 7. Canvas centering on 8x8 black canvas
-    canvas = Image.new("RGB", (8, 8), (0, 0, 0))
-    ox = (8 - target_w) // 2
-    oy = (8 - target_h) // 2
+    # 7. Canvas centering on size x size black canvas
+    canvas = Image.new("RGB", (size, size), (0, 0, 0))
+    ox = (size - target_w) // 2
+    oy = (size - target_h) // 2
     canvas.paste(small, (ox, oy))
 
     # 8. Final contrast polish
@@ -111,17 +111,19 @@ def main():
                         help="Cropping mode: 'emblem' (zoomed logo mark, default), 'fin' (full tailfin), 'tight' (tight crop)")
     parser.add_argument("--input", default=INPUT_FOLDER, help="Input directory containing .webp files")
     parser.add_argument("--output", default=OUTPUT_FOLDER, help="Output directory for generated .gif icons")
+    parser.add_argument("--size", type=int, default=8, help="Target icon size in pixels (square), default 8")
     args = parser.parse_args()
 
     os.makedirs(args.output, exist_ok=True)
-    print(f"Starting batch conversion for AWTRIX (Mode: {args.mode})...")
+    suffix = "_logo" if args.size == 8 else f"_logo{args.size}"
+    print(f"Starting batch conversion (Mode: {args.mode}, Size: {args.size}x{args.size})...")
     converted = 0
     for path in sorted(glob.glob(os.path.join(args.input, "*.webp"))):
         filename = os.path.basename(path)
         iata = os.path.splitext(filename)[0].lower()
-        out_path = os.path.join(args.output, f"{iata}_logo.gif")
+        out_path = os.path.join(args.output, f"{iata}{suffix}.gif")
         try:
-            convert(path, out_path, mode=args.mode)
+            convert(path, out_path, mode=args.mode, size=args.size)
             print(f"OK  {filename} -> {iata}_logo.gif")
             converted += 1
         except Exception as e:

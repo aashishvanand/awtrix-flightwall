@@ -22,3 +22,5 @@ tailfin/
 
 .claude
 venv
+
+__pycache__
