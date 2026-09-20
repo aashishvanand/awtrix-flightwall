@@ -7,9 +7,10 @@ route scrolling next to it.
 
 ```
 Schedule Trigger (n8n, every 30s)
-  -> OpenSky Network API (bounding box around home coordinates)
-  -> pick nearest in-flight aircraft
-  -> adsbdb.com (callsign -> route + airline)
+  -> [OpenSky Network API, FlightRadar24 live feed] in parallel (bounding box around home coordinates)
+  -> merge + de-duplicate -> pick nearest in-flight aircraft
+  -> [adsbdb.com, FlightRadar24 live feed] in parallel (callsign -> route + airline)
+  -> merge + compare -> trust whichever source is live/plausible
   -> PUT to AWTRIX NG pushed-app API
 ```
 
@@ -165,24 +166,75 @@ else needs editing.
 
 1. **Every 30s** — Schedule Trigger. (OpenSky's free tier is ~4000 API
    credits/day; 30s polling stays comfortably inside that.)
-2. **Get OpenSky Token** — OAuth2 client-credentials exchange.
-3. **Fetch Nearby States** — bounding-box query for aircraft near home coordinates.
-4. **Nearest Aircraft** (Code node) — haversine-distance-sorts the results,
-   filters out grounded aircraft / empty callsigns, keeps the closest.
-5. **Aircraft Found?** — branches to clear the display if nothing's overhead.
-6. **Lookup Route (adsbdb)** — free lookup at [adsbdb.com](https://api.adsbdb.com)
-   resolving callsign -> origin/destination airports + airline IATA code.
-7. **Build Payload** — constructs the AWTRIX NG pushed-app JSON, e.g.:
+2. **Position stage, run in parallel:**
+   - **Get OpenSky Token** — OAuth2 client-credentials exchange, then
+     **Fetch Nearby States** — OpenSky's bounding-box query for aircraft near
+     home coordinates.
+   - **Fetch Nearby States (FR24)** — the same bounding box against
+     FlightRadar24's live feed (the unofficial
+     `data-cloud.flightradar24.com/zones/fcgi/feed.js` endpoint the
+     [FlightRadarAPI](https://pypi.org/project/FlightRadarAPI/) Python/Node
+     wrappers call), using its `bounds` parameter.
+   - **Merge Position Data** — waits for both, joins them into one item.
+3. **Nearest Aircraft** (Code node) — unions both position lists, de-duplicated
+   by `icao24` (FR24 reports it uppercase, OpenSky lowercase; OpenSky's entry
+   wins on overlap since it's the documented, sanctioned source — FR24 only
+   fills in coverage gaps, e.g. an aircraft one network's ground receivers
+   missed but the other's caught), then haversine-distance-sorts the combined
+   pool and keeps the closest.
+4. **Aircraft Found?** — branches to clear the display if nothing's overhead.
+5. **Route stage, run in parallel:**
+   - **Lookup Route (adsbdb)** — free lookup at
+     [adsbdb.com](https://api.adsbdb.com) resolving callsign -> origin/destination
+     airports + airline IATA code.
+   - **Verify Route (FR24)** — the same FR24 feed endpoint, this time filtered
+     by the aircraft's airline ICAO code and matched on its exact callsign.
+   - **Merge Route Data** — waits for both, joins them into one item.
+6. **Compare Routes** (Code node) — adsbdb and hexdb.io both resolve routes
+   from a static flight-number table that can hold decade-old records (a real
+   example hit during development: callsign `TGW543`/`TR543` still resolved to
+   a 2012-era Tiger Airways Australia domestic route, `SYD-MEL`, on both
+   services — even though `TR` is Scoot's IATA code today and Scoot has never
+   flown that route). This node decides which route to trust:
+   - A live FR24 match wins outright (it reflects what's actually airborne
+     right now, not a static table).
+   - Otherwise, adsbdb's route is used only if the aircraft's real position is
+     within a plausible distance of one of its claimed airports.
+   - If only one source has data at all (e.g. adsbdb has no record for a
+     private/GA or military/cargo callsign, but FR24 has a filed flight plan
+     for it, or vice versa), that source alone is used — confirmed live: a
+     callsign `ATN730` cycle had no adsbdb record at all, and FR24 alone
+     supplied both the route and an airline icon (derived from its flight
+     number prefix, the same trick the FlightRadarAPI wrappers use).
+   - The cycle is skipped entirely (previous display stays) only when
+     *neither* source has anything usable.
+   The full comparison (`adsbdb`, `fr24`, `match`, `trustedRoute`,
+   `trustedSource`) stays on the item, visible in the n8n execution log for
+   every run, so a bad upstream record is obvious at a glance.
+7. **Build Payload** — constructs the AWTRIX NG pushed-app JSON from the
+   verified route, e.g.:
    ```json
    { "text": "SQ123 SIN-KUL", "icon": "sq_logo", "durationMs": 5000, "textCase": "asTyped" }
    ```
-   Falls back to callsign-only text (no icon) if adsbdb has no route match.
+   Falls back to callsign-only text (generic icon) if neither source has a
+   trustworthy route.
 8. **Push to Clock** — `PUT http://<CLOCK_IP>/api/v1/apps/pushed/adsb` (with
    `Content-Type: application/json`). When no aircraft is overhead, **Clear
    Clock** instead sends `DELETE http://<CLOCK_IP>/api/v1/apps/adsb`.
 
 Remember to flip the workflow to **Active** in n8n once it's configured — it
 imports inactive by default.
+
+> **A note on `$('NodeName')` references after a `Merge` node:** every
+> `$('NodeName').item.json` reference anywhere in this workflow uses
+> `.first().json` instead. n8n's `.item` accessor resolves the *paired* input
+> item by tracing lineage back through the graph, and that trace breaks with
+> `Cannot read properties of undefined` once an item has passed through a
+> branch-then-rejoin — even via a proper `Merge` node, confirmed by
+> reproducing it on a disposable test workflow. `.first()` just grabs a
+> node's first output item directly, with no lineage-tracing involved, so it
+> works identically before or after any `Merge` in the graph. If you edit any
+> Code node or expression here, keep using `.first()`, not `.item`.
 
 ## Repo layout
 
