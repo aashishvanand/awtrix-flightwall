@@ -14,9 +14,6 @@ logo/
 # scratch
 *.log
 
-# local upload state (tracks what's already on the clock)
-.upload_state.json
-
 #image
 tailfin/
 
@@ -24,3 +21,5 @@ tailfin/
 venv
 
 __pycache__
+# export of the n8n airline_icons data table (third-party logos)
+airline_icons.backup.json

@@ -1,0 +1,680 @@
+{
+    "name": "Ulanzi TC001 - Aircraft Overhead",
+    "nodes": [
+        {
+            "id": "ea72da9e-6cd9-49a1-86da-3c0f17111cb4",
+            "name": "Every 30s",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.2,
+            "position": [
+                -1200,
+                688
+            ],
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "seconds"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": "bb18526b-6767-4a09-be15-d0af8896c37d",
+            "name": "Config (edit per location)",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                -976,
+                688
+            ],
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "HOME_LAT",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "name": "HOME_LON",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "name": "RADIUS_DEG",
+                            "type": "number",
+                            "value": 0.15
+                        },
+                        {
+                            "name": "CLOCK_IP",
+                            "type": "string",
+                            "value": "YOUR_CLOCK_IP"
+                        },
+                        {
+                            "name": "OPENSKY_CLIENT_ID",
+                            "type": "string",
+                            "value": "PASTE_CLIENT_ID"
+                        },
+                        {
+                            "name": "OPENSKY_CLIENT_SECRET",
+                            "type": "string",
+                            "value": "PASTE_CLIENT_SECRET"
+                        }
+                    ]
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "9398fbb0-200d-48dd-ae49-390e2045bea0",
+            "name": "Get/Refresh OpenSky Token",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -752,
+                544
+            ],
+            "parameters": {
+                "jsCode": "// Reuse the cached OpenSky JWT if it's still valid; only hit the auth\n// endpoint when it's missing or about to expire (60s safety margin).\nconst cfg = $('Config (edit per location)').first().json;\nconst staticData = $getWorkflowStaticData('global');\nconst now = Math.floor(Date.now() / 1000);\nconst SAFETY_MARGIN = 60;\n\nif (staticData.openskyToken && staticData.openskyTokenExpiry && now < staticData.openskyTokenExpiry - SAFETY_MARGIN) {\n  return [{ json: { access_token: staticData.openskyToken } }];\n}\n\nconst bodyParams = Object.entries({\n  grant_type: 'client_credentials',\n  client_id: cfg.OPENSKY_CLIENT_ID,\n  client_secret: cfg.OPENSKY_CLIENT_SECRET\n}).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');\n\nconst response = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token',\n  body: bodyParams,\n  headers: { 'Content-Type': 'application/x-www-form-urlencoded' }\n});\n\nstaticData.openskyToken = response.access_token;\nstaticData.openskyTokenExpiry = now + (response.expires_in || 1800);\n\nreturn [{ json: { access_token: response.access_token } }];"
+            }
+        },
+        {
+            "id": "894279cd-d962-4c01-a22c-f489bc628875",
+            "name": "Fetch Nearby States",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                -528,
+                544
+            ],
+            "parameters": {
+                "url": "=https://opensky-network.org/api/states/all?lamin={{ $('Config (edit per location)').first().json.HOME_LAT - $('Config (edit per location)').first().json.RADIUS_DEG }}&lomin={{ $('Config (edit per location)').first().json.HOME_LON - $('Config (edit per location)').first().json.RADIUS_DEG }}&lamax={{ $('Config (edit per location)').first().json.HOME_LAT + $('Config (edit per location)').first().json.RADIUS_DEG }}&lomax={{ $('Config (edit per location)').first().json.HOME_LON + $('Config (edit per location)').first().json.RADIUS_DEG }}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "=Bearer {{ $json.access_token }}"
+                        }
+                    ]
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "85c4d110-789b-48aa-abfc-fab4fbaa5d3e",
+            "name": "Nearest Aircraft",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -80,
+                688
+            ],
+            "parameters": {
+                "jsCode": "// Find the aircraft to show this cycle, using the union of OpenSky's and\n// FlightRadar24's live position feeds -- each draws from overlapping but not\n// identical ADS-B ground-receiver networks, so combining them catches aircraft\n// one network's receivers missed but the other's caught. De-duplicated by icao24\n// (FR24 reports it uppercase, OpenSky lowercase); OpenSky's entry wins on overlap\n// since it's the sanctioned, documented source, FR24's unofficial feed only fills\n// in gaps.\n//\n// \"To show this cycle\" is deliberately not just \"closest\": see the rotation\n// logic at the bottom -- when multiple aircraft are within ROTATION_RADIUS_KM\n// (genuinely overhead, not just inside RADIUS_DEG's much wider bounding-box\n// search), each cycle advances to the next one by distance instead of always\n// locking onto whichever is nearest, so a second (or third) aircraft overhead\n// isn't invisible for as long as the first stays in range.\nconst cfg = $('Config (edit per location)').first().json;\nconst openskyStates = $('Fetch Nearby States').first().json.states || [];\nconst fr24Data = $('Fetch Nearby States (FR24)').first().json;\n\nfunction haversineKm(lat1, lon1, lat2, lon2) {\n  const R = 6371;\n  const dLat = (lat2 - lat1) * Math.PI / 180;\n  const dLon = (lon2 - lon1) * Math.PI / 180;\n  const a = Math.sin(dLat / 2) ** 2 +\n    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *\n    Math.sin(dLon / 2) ** 2;\n  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n}\n\n// Unit conversions -- OpenSky reports velocity/vertical_rate in SI units\n// (m/s); FR24's unofficial feed already reports both in the units a pilot\n// or plane-spotter actually uses (knots, ft/min -- confirmed against a live\n// sample while building this), so only the OpenSky side needs converting.\nconst MS_TO_KT = 1.943844;\nconst MS_TO_FPM = 196.850394;\n\nconst byKey = new Map();\n\nfor (const s of openskyStates) {\n  if (s[5] == null || s[6] == null || !s[1] || !s[1].trim() || s[8] !== false) continue;\n  const icao24 = (s[0] || '').toLowerCase();\n  const callsign = s[1].trim();\n  const key = icao24 || `callsign:${callsign}`;\n  byKey.set(key, {\n    key, callsign, lon: s[5], lat: s[6], altitude: s[7], source: 'opensky',\n    icao24: icao24 || null, tail: null,\n    speedKt: s[9] != null ? Math.round(s[9] * MS_TO_KT) : null,\n    verticalRateFpm: s[11] != null ? Math.round(s[11] * MS_TO_FPM) : null,\n  });\n}\n\n// Registration (tail number) by icao24, collected from FR24 regardless of which\n// feed ends up winning \"nearest\" for that aircraft -- registration is static per\n// airframe, so an FR24-sourced tail is still correct for an OpenSky-sourced position.\nconst fr24InfoByIcao24 = new Map();\n\nif (fr24Data && !fr24Data.error && typeof fr24Data === 'object') {\n  for (const info of Object.values(fr24Data)) {\n    if (!Array.isArray(info)) continue; // skip \"full_count\"/\"version\"/\"stats\" keys\n    const callsign = (info[16] || '').trim();\n    const icao24 = (info[0] || '').toLowerCase();\n    if (icao24 && (info[9] || info[8])) fr24InfoByIcao24.set(icao24, { registration: info[9] || null, type: info[8] || null });\n    // FR24 encodes on_ground as 0/1 (a number), not a real boolean like OpenSky's\n    // on_ground field -- `=== true` never matched, letting parked/grounded aircraft\n    // (e.g. N512DN sitting at Seletar/QPG) through and dominating \"nearest\" for as\n    // long as FR24 kept reporting them (maxage=14400 = up to 4 hours).\n    if (!callsign || info[1] == null || info[2] == null || info[14]) continue;\n    const key = icao24 || `callsign:${callsign}`;\n    if (!byKey.has(key)) {\n      byKey.set(key, {\n        key, callsign, lon: info[2], lat: info[1], altitude: info[4], source: 'fr24',\n        icao24: icao24 || null, tail: info[9] || null,\n        speedKt: info[5] != null ? Math.round(info[5]) : null,\n        verticalRateFpm: info[15] != null ? Math.round(info[15]) : null,\n      });\n    }\n  }\n}\n\nconst candidates = Array.from(byKey.values())\n  .map(c => ({ ...c, distanceKm: haversineKm(cfg.HOME_LAT, cfg.HOME_LON, c.lat, c.lon) }))\n  .sort((a, b) => a.distanceKm - b.distanceKm);\n\nif (candidates.length === 0) {\n  return [{ json: { found: false } }];\n}\n\n// Rotation only happens among aircraft that are genuinely close, not\n// everything RADIUS_DEG's bounding-box search turned up -- that box is\n// ~16km half-width (up to ~23km at the corners) and near a busy airport\n// routinely holds 5-15 aircraft, most of which aren't meaningfully\n// \"overhead\" in the way this project is framed. Without this filter,\n// rotation would cycle through all of them and dilute how often a\n// genuinely-close aircraft gets shown to 1/N.\nconst ROTATION_RADIUS_KM = 8;\nconst rotationPool = candidates.filter(c => c.distanceKm <= ROTATION_RADIUS_KM);\n// Nothing within that tighter radius -- fall back to just the single\n// closest candidate from the full box (pre-rotation behavior), so a quiet\n// period still shows *something* plausible rather than nothing, and\n// definitely not something 20km away just to satisfy \"rotate to the next\".\nconst pool = rotationPool.length > 0 ? rotationPool : candidates.slice(0, 1);\n\n// Persisted across executions via n8n's workflow static data (the same\n// mechanism $getWorkflowStaticData always refers to -- scoped to this\n// workflow, survives between scheduled runs; only written back for\n// trigger-driven runs on an active workflow, not manual \"Execute\n// Workflow\" test runs). Advances to the next-by-distance candidate\n// *within the current pool* from whichever key was shown last cycle; if\n// that aircraft isn't in this cycle's pool (left range, or the pool\n// itself changed because nothing was within ROTATION_RADIUS_KM last\n// time), restarts at the pool's closest entry rather than erroring or\n// guessing.\nconst staticData = $getWorkflowStaticData('global');\nlet winnerIndex = 0;\nif (staticData.lastShownKey) {\n  const prevIndex = pool.findIndex(c => c.key === staticData.lastShownKey);\n  if (prevIndex >= 0) winnerIndex = (prevIndex + 1) % pool.length;\n}\n\nconst winner = pool[winnerIndex];\nstaticData.lastShownKey = winner.key;\nconst fr24Info = winner.icao24 ? fr24InfoByIcao24.get(winner.icao24) : null;\nwinner.tail = winner.tail || (fr24Info && fr24Info.registration) || null;\n// Static per-airframe like registration -- adsbdb's /v0/aircraft/{icao24} lookup\n// (keyed by this same hex) is the richer source (full manufacturer name + ICAO\n// type), but doesn't have every hex (private/GA, newly registered, or a hex\n// reassigned since adsbdb's table was last refreshed). FR24's live feed carries\n// a bare type code for anything it's currently tracking, so Build Payload\n// (Matrix64) falls back to this when adsbdb comes up empty.\nwinner.fr24AircraftType = (fr24Info && fr24Info.type) || null;\n\nreturn [{ json: { found: true, ...winner } }];\n"
+            }
+        },
+        {
+            "id": "cd570c59-93ce-41fd-a3ab-6774cebaf167",
+            "name": "Aircraft Found?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                144,
+                688
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 1
+                    },
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.found }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "bb55cc14-1416-4bc3-9c6e-01d63003d650",
+            "name": "Lookup Route (adsbdb)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "retryOnFail": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000,
+            "onError": "continueRegularOutput",
+            "position": [
+                368,
+                16
+            ],
+            "parameters": {
+                "url": "=https://api.adsbdb.com/v0/callsign/{{ $json.callsign }}",
+                "options": {}
+            }
+        },
+        {
+            "id": "36885bc6-5c71-4879-b14d-2e5e340fa47d",
+            "name": "Build Payload",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1264,
+                16
+            ],
+            "parameters": {
+                "jsCode": "const nearest = $('Nearest Aircraft').first().json;\nconst cmp = $('Compare Routes').first().json;\n\nif (cmp.skip) {\n  return [];\n}\n\n// Icons are pushed inline as base64 GIFs (AWTRIX NG treats any `icon` longer\n// than 64 chars as base64 JPEG/GIF), so nothing is stored on the clock. Send\n// the bare base64 -- NG decodes the whole string, so a `data:image/gif;base64,`\n// prefix corrupts it and the icon is silently dropped.\n// Logo rows from Lookup Icon (airline_icons data table), which fetches the\n// ICAO match, the IATA match and the generic '00' row in one query. The ICAO\n// designator wins, then adsbdb's IATA code, then '00'.\nconst iconRows = $('Lookup Icon').all().map(i => i.json);\nconst iconRow = (cmp.airlineIcao && iconRows.find(r => r.icao === cmp.airlineIcao))\n  || (cmp.airlineIata && iconRows.find(r => r.iata === cmp.airlineIata))\n  || iconRows.find(r => r.code === '00');\nconst payload = {\n  text: cmp.trustedRoute ? `${nearest.callsign} ${cmp.trustedRoute.from}-${cmp.trustedRoute.to}` : nearest.callsign,\n  durationMs: 5000,\n  textCase: 'asTyped',\n};\nif (iconRow && iconRow.icon8) payload.icon = iconRow.icon8;\nreturn [{ json: payload }];\n"
+            }
+        },
+        {
+            "id": "389d8e3c-74d3-4848-9466-bee993ba7fa9",
+            "name": "Push to Clock",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                1488,
+                -80
+            ],
+            "parameters": {
+                "method": "PUT",
+                "url": "=http://{{ $('Config (edit per location)').first().json.CLOCK_IP }}/api/v1/apps/pushed/adsb",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json) }}",
+                "options": {}
+            }
+        },
+        {
+            "id": "c1e4cf0c-0f9c-484a-b3f5-f703155ef4c1",
+            "name": "Clear Clock",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                368,
+                400
+            ],
+            "parameters": {
+                "method": "DELETE",
+                "url": "=http://{{ $('Config (edit per location)').first().json.CLOCK_IP }}/api/v1/apps/adsb",
+                "options": {}
+            }
+        },
+        {
+            "id": "37ac7686-a364-4aa0-ada4-6ed046a55361",
+            "name": "Verify Route (FR24)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "retryOnFail": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000,
+            "onError": "continueRegularOutput",
+            "position": [
+                368,
+                208
+            ],
+            "parameters": {
+                "url": "https://data-cloud.flightradar24.com/zones/fcgi/feed.js",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "faa",
+                            "value": "1"
+                        },
+                        {
+                            "name": "satellite",
+                            "value": "1"
+                        },
+                        {
+                            "name": "mlat",
+                            "value": "1"
+                        },
+                        {
+                            "name": "flarm",
+                            "value": "1"
+                        },
+                        {
+                            "name": "adsb",
+                            "value": "1"
+                        },
+                        {
+                            "name": "gnd",
+                            "value": "1"
+                        },
+                        {
+                            "name": "air",
+                            "value": "1"
+                        },
+                        {
+                            "name": "vehicles",
+                            "value": "1"
+                        },
+                        {
+                            "name": "estimated",
+                            "value": "1"
+                        },
+                        {
+                            "name": "maxage",
+                            "value": "14400"
+                        },
+                        {
+                            "name": "gliders",
+                            "value": "1"
+                        },
+                        {
+                            "name": "stats",
+                            "value": "1"
+                        },
+                        {
+                            "name": "limit",
+                            "value": "5000"
+                        },
+                        {
+                            "name": "airline",
+                            "value": "={{ ($('Nearest Aircraft').first().json.callsign.match(/^[A-Za-z]+/) || [''])[0] }}"
+                        }
+                    ]
+                },
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "accept",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "user-agent",
+                            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+                        },
+                        {
+                            "name": "referer",
+                            "value": "https://www.flightradar24.com/"
+                        },
+                        {
+                            "name": "origin",
+                            "value": "https://www.flightradar24.com"
+                        }
+                    ]
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "fa3cc8ec-0300-43c2-98c3-c2f3c9eb3839",
+            "name": "Compare Routes",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                816,
+                208
+            ],
+            "parameters": {
+                "jsCode": "const nearest = $('Nearest Aircraft').first().json;\nconst resp = $('Lookup Route (adsbdb)').first().json;\nconst fr24 = $('Verify Route (FR24)').first().json;\n\nfunction distanceKm(lat1, lon1, lat2, lon2) {\n  const R = 6371;\n  const dLat = (lat2 - lat1) * Math.PI / 180;\n  const dLon = (lon2 - lon1) * Math.PI / 180;\n  const a = Math.sin(dLat / 2) ** 2 +\n    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;\n  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n}\n\n// FlightRadar24's live feed (unofficial data-cloud.flightradar24.com/zones/fcgi/feed.js\n// endpoint) reflects what's actually airborne right now, unlike adsbdb/hexdb.io's static\n// flight-number tables, which can hold decade-old records (TGW543/TR543 resolved to a\n// stale 2012 SYD-MEL entry in both). It also carries private/GA aircraft with a filed\n// flight plan that adsbdb has no scheduled-flight-number record for at all.\nfunction findFr24Match(callsign) {\n  if (!fr24 || fr24.error || typeof fr24 !== 'object') return null;\n  for (const info of Object.values(fr24)) {\n    if (!Array.isArray(info)) continue; // skip \"full_count\"/\"version\"/\"stats\" keys\n    if (info[16] === callsign) {\n      return {\n        from: info[11] || null,\n        to: info[12] || null,\n        // Field 18 is the operator's ICAO airline designator (SIA, QTR, ASY) --\n        // the code actually filed in the ATC callsign, and unique per operator,\n        // unlike IATA codes, which get reassigned. Empty for private/GA.\n        airlineIcao: info[18] ? String(info[18]).toLowerCase() : null,\n      };\n    }\n  }\n  return null;\n}\n\nconst adsbdbOk = !(resp && resp.error);\nconst route = adsbdbOk && resp && resp.response && resp.response.flightroute;\n\n// No live FR24 entry for this callsign. Fall back to trusting adsbdb's route only if\n// the aircraft is currently within a plausible distance of one of its claimed airports.\nconst PLAUSIBLE_RADIUS_KM = 150;\nfunction adsbdbPlausible() {\n  if (!route || !route.origin || !route.destination) return false;\n  if (typeof nearest.lat !== 'number' || typeof nearest.lon !== 'number') return true;\n  const dOrigin = distanceKm(nearest.lat, nearest.lon, route.origin.latitude, route.origin.longitude);\n  const dDest = distanceKm(nearest.lat, nearest.lon, route.destination.latitude, route.destination.longitude);\n  return dOrigin <= PLAUSIBLE_RADIUS_KM || dDest <= PLAUSIBLE_RADIUS_KM;\n}\n\nconst adsbdbRoute = route && route.origin && route.destination\n  ? { from: route.origin.iata_code || route.origin.icao_code, to: route.destination.iata_code || route.destination.icao_code }\n  : null;\nconst adsbdbAirlineIata = route && route.airline && route.airline.iata ? route.airline.iata.toLowerCase() : null;\nconst adsbdbAirlineIcao = route && route.airline && route.airline.icao ? route.airline.icao.toLowerCase() : null;\nconst callsignIata = route && route.callsign_iata ? route.callsign_iata : null;\n\nconst fr24Match = findFr24Match(nearest.callsign);\nconst fr24Route = fr24Match && fr24Match.from && fr24Match.to ? { from: fr24Match.from, to: fr24Match.to } : null;\n\nlet match = null;\nif (adsbdbRoute && fr24Route) {\n  match = adsbdbRoute.from === fr24Route.from && adsbdbRoute.to === fr24Route.to;\n}\n\n// Trust order: a live FR24 match first (real current trajectory) beats adsbdb's route\n// unconditionally; otherwise adsbdb's route only if it's geographically plausible given\n// where the aircraft actually is right now. adsbdb having nothing at all (private jets,\n// unknown callsigns, network errors) no longer blanks the whole cycle by itself -- FR24\n// alone is enough to show a route/callsign, and vice versa.\nlet trustedRoute = null;\nlet trustedSource = 'none';\nif (fr24Route) {\n  trustedRoute = fr24Route;\n  trustedSource = 'fr24';\n} else if (adsbdbRoute && adsbdbPlausible()) {\n  trustedRoute = adsbdbRoute;\n  trustedSource = 'adsbdb-plausible';\n}\n\n// Airline identity for icons: the ICAO designator, from FR24's live feed first (same\n// trust order as the route), else adsbdb's airline record. airlineIata is only ever\n// adsbdb's own IATA field -- never derived from a flight number or callsign. Both\n// null for a private/GA aircraft, which resolves to the generic icon downstream.\nconst airlineIcao = (fr24Match && fr24Match.airlineIcao) || adsbdbAirlineIcao;\nconst airlineIata = adsbdbAirlineIata;\n\n// Nothing usable from either source -- skip this push cycle so the clock keeps\n// showing its last good entry instead of a bare, unconfirmed callsign.\nconst skip = !adsbdbOk && !fr24Match;\n\n// This full comparison stays on the item (visible in the n8n execution log for every\n// run) even though only trustedRoute/airlineIata get used downstream -- so a bad\n// adsbdb record, or a case where only one source had data, is obvious at a glance.\nreturn [{\n  json: {\n    skip,\n    callsign: nearest.callsign,\n    callsignIata,\n    airlineIcao,\n    airlineIata,\n    adsbdbOk,\n    adsbdb: adsbdbRoute,\n    fr24: fr24Route,\n    match,\n    trustedRoute,\n    trustedSource\n  }\n}];\n"
+            }
+        },
+        {
+            "id": "c14a4299-4e41-4cca-9976-eb0352b49418",
+            "name": "Fetch Nearby States (FR24)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "retryOnFail": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000,
+            "onError": "continueRegularOutput",
+            "position": [
+                -528,
+                736
+            ],
+            "parameters": {
+                "url": "https://data-cloud.flightradar24.com/zones/fcgi/feed.js",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "faa",
+                            "value": "1"
+                        },
+                        {
+                            "name": "satellite",
+                            "value": "1"
+                        },
+                        {
+                            "name": "mlat",
+                            "value": "1"
+                        },
+                        {
+                            "name": "flarm",
+                            "value": "1"
+                        },
+                        {
+                            "name": "adsb",
+                            "value": "1"
+                        },
+                        {
+                            "name": "gnd",
+                            "value": "1"
+                        },
+                        {
+                            "name": "air",
+                            "value": "1"
+                        },
+                        {
+                            "name": "vehicles",
+                            "value": "1"
+                        },
+                        {
+                            "name": "estimated",
+                            "value": "1"
+                        },
+                        {
+                            "name": "maxage",
+                            "value": "14400"
+                        },
+                        {
+                            "name": "gliders",
+                            "value": "1"
+                        },
+                        {
+                            "name": "stats",
+                            "value": "1"
+                        },
+                        {
+                            "name": "limit",
+                            "value": "5000"
+                        },
+                        {
+                            "name": "bounds",
+                            "value": "={{ ($('Config (edit per location)').first().json.HOME_LAT + $('Config (edit per location)').first().json.RADIUS_DEG) + ',' + ($('Config (edit per location)').first().json.HOME_LAT - $('Config (edit per location)').first().json.RADIUS_DEG) + ',' + ($('Config (edit per location)').first().json.HOME_LON - $('Config (edit per location)').first().json.RADIUS_DEG) + ',' + ($('Config (edit per location)').first().json.HOME_LON + $('Config (edit per location)').first().json.RADIUS_DEG) }}"
+                        }
+                    ]
+                },
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "accept",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "user-agent",
+                            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+                        },
+                        {
+                            "name": "referer",
+                            "value": "https://www.flightradar24.com/"
+                        },
+                        {
+                            "name": "origin",
+                            "value": "https://www.flightradar24.com"
+                        }
+                    ]
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "96f9ae21-189e-4f64-871b-48f90b7bb29b",
+            "name": "Merge Position Data",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3,
+            "position": [
+                -304,
+                688
+            ],
+            "parameters": {}
+        },
+        {
+            "id": "37a850ff-b4f9-4b18-ad29-6fdba2a33633",
+            "name": "Merge Route Data",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3,
+            "position": [
+                592,
+                208
+            ],
+            "parameters": {}
+        },
+        {
+            "id": "fe1e73b8-9c8d-4b09-b1eb-e676e8b72629",
+            "name": "Lookup Icon",
+            "type": "n8n-nodes-base.dataTable",
+            "typeVersion": 1.1,
+            "alwaysOutputData": true,
+            "onError": "continueRegularOutput",
+            "position": [
+                1040,
+                208
+            ],
+            "parameters": {
+                "resource": "row",
+                "operation": "get",
+                "dataTableId": {
+                    "__rl": true,
+                    "mode": "id",
+                    "value": "YOUR_AIRLINE_ICONS_TABLE_ID"
+                },
+                "matchType": "anyCondition",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "icao",
+                            "condition": "eq",
+                            "keyValue": "={{ $json.airlineIcao || '-' }}"
+                        },
+                        {
+                            "keyName": "iata",
+                            "condition": "eq",
+                            "keyValue": "={{ $json.airlineIata || '-' }}"
+                        },
+                        {
+                            "keyName": "code",
+                            "condition": "eq",
+                            "keyValue": "00"
+                        }
+                    ]
+                },
+                "limit": 5
+            }
+        }
+    ],
+    "connections": {
+        "Every 30s": {
+            "main": [
+                [
+                    {
+                        "node": "Config (edit per location)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Config (edit per location)": {
+            "main": [
+                [
+                    {
+                        "node": "Get/Refresh OpenSky Token",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Fetch Nearby States (FR24)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get/Refresh OpenSky Token": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Nearby States",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Nearby States": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Position Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Nearest Aircraft": {
+            "main": [
+                [
+                    {
+                        "node": "Aircraft Found?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aircraft Found?": {
+            "main": [
+                [
+                    {
+                        "node": "Lookup Route (adsbdb)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Verify Route (FR24)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Clear Clock",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lookup Route (adsbdb)": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Route Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Payload": {
+            "main": [
+                [
+                    {
+                        "node": "Push to Clock",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Verify Route (FR24)": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Route Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Compare Routes": {
+            "main": [
+                [
+                    {
+                        "node": "Lookup Icon",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Nearby States (FR24)": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Position Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Merge Position Data": {
+            "main": [
+                [
+                    {
+                        "node": "Nearest Aircraft",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge Route Data": {
+            "main": [
+                [
+                    {
+                        "node": "Compare Routes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lookup Icon": {
+            "main": [
+                [
+                    {
+                        "node": "Build Payload",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": true
+    }
+}

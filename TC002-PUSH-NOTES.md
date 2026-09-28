@@ -91,14 +91,14 @@ base64 GIF in the same request:
   added to this repo's existing 8x8-only converter — same emblem-focus
   cropping logic, just parameterized). 16x16 fills the panel's full
   height nicely; 8x8 (the AWTRIX-native size) also works, just smaller.
-- Because there's nothing to upload once and reference later, a
-  base64 lookup map has to travel with the workflow itself. In practice:
-  build a `{iata: base64string}` (or whatever your key is) map once with
-  a small Python script and paste it as a `const` inside the n8n Code
-  node that builds the payload — see `Build Payload TC002` in
-  `n8n_aircraft_workflow.local.json` for the exact pattern. ~280 icons at
-  16x16 costs ~190KB of JSON text — completely fine to inline in a Code
-  node.
+- Because there's nothing to upload once and reference later, the
+  base64 has to come from n8n on every push. In this repo it lives in the
+  `airline_icons` n8n data table (column `icon16`, filled by
+  `sync_icons.py`). A **Lookup Icon** Data Table node fetches the row
+  and `Build Payload TC002` puts it in `image[].data` — see the README's
+  *Icon pipeline*. (An earlier version inlined a `{code: base64}` map as a
+  `const` in the Code node. That works too, but it bloats the workflow
+  and every new icon means republishing it.)
 - If a project has no pre-existing icon set (e.g. weather conditions),
   it's simplest to skip `image` entirely and ship text-only — don't
   invent an icon pipeline just for this.
@@ -130,7 +130,9 @@ to another workflow:
    into the schema above (array `text[]`, optional inline `image[]`,
    ASCII/uppercase content).
 3. Add a `Push to Clock 2 (TC002)` HTTP node: `POST
-   http://{{CLOCK2_IP}}/api/custom?name=<app>`, body = that node's output.
+   http://{{CLOCK2_IP}}/api/custom?name=<app>`, body = that node's output
+   (here `$json.payload` — the builder outputs `{ payload, iconCode }` so
+   the missing-icon log can read `iconCode`).
 4. Wherever the workflow currently clears the AWTRIX NG app (e.g. a
    `DELETE` node when there's nothing to show), add a parallel `POST
    .../api/custom?name=<app>` with body `{}` for TC002.
