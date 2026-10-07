@@ -28,6 +28,9 @@ Usage:
   venv/bin/python sync_icons.py --icao 3y=MYU               # fix a mapping, no conversion
   venv/bin/python sync_icons.py --all                       # re-convert everything
 
+Any row in the workflow's `missing_tailfin` to-do table whose airline now has
+a logo here (same ICAO-then-IATA rule as Lookup Icon) is removed afterwards.
+
 Reads `n8n` (API key) and `n8nurl` from .env. Every write also exports the
 whole table to airline_icons.backup.json (gitignored -- the logos are
 third-party trademarks).
@@ -52,6 +55,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_INPUT = os.path.join(HERE, "..", "TailFin", "tailfin")
 BACKUP = os.path.join(HERE, "airline_icons.backup.json")
 TABLE_NAME = "airline_icons"
+# The live workflow's to-do list of airlines that fell back to the 00 tail.
+MISSING_TABLE = "missing_tailfin"
 COLUMNS = ("code", "icao", "iata", "name", "icon8", "icon16", "icon24")
 SIZES = {"icon8": 8, "icon16": 16, "icon24": 24}
 # Columns stored as raw RGB565 instead of GIF (the matrix firmware has no
@@ -134,6 +139,39 @@ def upsert(table_id, row):
         "data": row,
         "returnData": False,
     })
+
+
+def prune_missing(icon_rows, dry_run):
+    """Drop missing_tailfin rows the workflow would now match to a logo, by the
+    same rule as Lookup Icon: the row's ICAO designator, else its IATA code."""
+    tables = api("GET", "/data-tables", query={"limit": 250})["data"]
+    match = [t for t in tables if t["name"] == MISSING_TABLE]
+    if not match:
+        return
+    table_id = match[0]["id"]
+    icaos = {r["icao"] for r in icon_rows.values() if r["icao"]}
+    iatas = {r["iata"] for r in icon_rows.values() if r["iata"]}
+    rows, cursor = [], None
+    while True:
+        query = {"limit": 250, **({"cursor": cursor} if cursor else {})}
+        page = api("GET", f"/data-tables/{table_id}/rows", query=query)
+        rows += page["data"]
+        cursor = page.get("nextCursor")
+        if not cursor:
+            break
+    covered = [r for r in rows if (r.get("icao") or "") in icaos or (r.get("iataCode") or "") in iatas]
+    if not covered:
+        return
+    names = ", ".join(sorted(r["airline"] or "?" for r in covered))
+    if dry_run:
+        print(f"Would remove from '{MISSING_TABLE}' (logo now in table): {names}")
+        return
+    for r in covered:
+        # The filter must be compact JSON -- n8n rejects the '+' a space encodes to.
+        f = json.dumps({"type": "and", "filters": [{"columnName": "id", "condition": "eq", "value": r["id"]}]},
+                       separators=(",", ":"))
+        api("DELETE", f"/data-tables/{table_id}/rows/delete", query={"filter": f})
+    print(f"Removed from '{MISSING_TABLE}' (logo now in table): {names}")
 
 
 # --- icons -------------------------------------------------------------------
@@ -274,6 +312,7 @@ def main():
         print(f"Rows with no source logo (kept): {', '.join(orphans)}")
     if args.dry_run or not changed:
         print("Nothing written." if changed else "Already up to date. Nothing written.")
+        prune_missing(merged, args.dry_run)
         return
 
     if table_id is None:
@@ -292,6 +331,7 @@ def main():
     with open(BACKUP, "w", encoding="utf-8") as f:
         json.dump([final[c] for c in sorted(final)], f, indent=1)
     print(f"{len(final)} rows verified; backup written to {os.path.relpath(BACKUP, HERE)}")
+    prune_missing(final, dry_run=False)
 
 
 if __name__ == "__main__":

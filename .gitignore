@@ -23,3 +23,4 @@ venv
 __pycache__
 # export of the n8n airline_icons data table (third-party logos)
 airline_icons.backup.json
+missing_tailfin.backup.json

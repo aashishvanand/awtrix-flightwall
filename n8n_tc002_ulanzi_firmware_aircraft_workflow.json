@@ -1,5 +1,5 @@
 {
-    "name": "Ulanzi TC002 - Aircraft Overhead",
+    "name": "Ulanzi TC002 - Aircraft Overhead (Ulanzi firmware)",
     "nodes": [
         {
             "id": "ea72da9e-6cd9-49a1-86da-3c0f17111cb4",
@@ -176,7 +176,7 @@
                 304
             ],
             "parameters": {
-                "jsCode": "// TC002 runs AWTRIX NG: a `layout` uses the full 52x16 panel (a plain\n// text/icon payload would be drawn at double size on a 26x8 grid). The\n// 16x16 tail logo (airline_icons data table, icon16 column) travels inline\n// as a GIF data URL, so nothing is stored on the clock. AWTRIX NG 1.2+\n// needs the data: prefix (bare base64 is rejected with 422).\nconst nearest = $('Nearest Aircraft').first().json;\nconst cmp = $('Compare Routes').first().json;\n\nif (cmp.skip) {\n  return [];\n}\n\nconst callsignText = cmp.callsignIata || nearest.callsign;\nconst routeText = cmp.trustedRoute ? `${cmp.trustedRoute.from}-${cmp.trustedRoute.to}` : null;\n// Logo rows from Lookup Icon (airline_icons data table), which fetches the\n// ICAO match, the IATA match and the generic '00' row in one query. The ICAO\n// designator wins, then adsbdb's IATA code, then '00'.\nconst iconRows = $('Lookup Icon').all().map(i => i.json);\nconst iconRow = (cmp.airlineIcao && iconRows.find(r => r.icao === cmp.airlineIcao))\n  || (cmp.airlineIata && iconRows.find(r => r.iata === cmp.airlineIata))\n  || iconRows.find(r => r.code === '00');\nconst iconB64 = iconRow && iconRow.icon16;\n\nconst textX = iconB64 ? 18 : 0;\nconst regions = [];\nif (iconB64) {\n  regions.push({ id: 'icon', box: [0, 0, 16, 16], icon: `data:image/gif;base64,${iconB64}` });\n}\nregions.push({ id: 'callsign', box: [textX, 0, 52 - textX, 8], text: callsignText, color: '#FFFFFF', align: 'start', textCase: 'asTyped' });\nif (routeText) {\n  regions.push({ id: 'route', box: [textX, 8, 52 - textX, 8], text: routeText, color: '#3EE08A', align: 'start', textCase: 'asTyped' });\n}\n\nreturn [{ json: { durationMs: 10000, layout: { version: 1, regions } } }];\n"
+                "jsCode": "// TC002 has no icon storage -- every push embeds the icon's pixels inline as\n// base64 (16x16, from the airline_icons data table).\nconst nearest = $('Nearest Aircraft').first().json;\nconst cmp = $('Compare Routes').first().json;\n\nif (cmp.skip) {\n  return [];\n}\n\nconst callsignText = cmp.callsignIata || nearest.callsign;\nconst routeText = cmp.trustedRoute ? `${cmp.trustedRoute.from}-${cmp.trustedRoute.to}` : null;\n// Logo rows from Lookup Icon (airline_icons data table), which fetches the\n// ICAO match, the IATA match and the generic '00' row in one query. The ICAO\n// designator wins, then adsbdb's IATA code, then '00'.\nconst iconRows = $('Lookup Icon').all().map(i => i.json);\nconst iconRow = (cmp.airlineIcao && iconRows.find(r => r.icao === cmp.airlineIcao))\n  || (cmp.airlineIata && iconRows.find(r => r.iata === cmp.airlineIata))\n  || iconRows.find(r => r.code === '00');\nconst iconB64 = iconRow && iconRow.icon16;\nconst text = [\n  { content: callsignText, fontHeight: 5, x: 20, y: 1, color: '#FFFFFF' }\n];\nif (routeText) {\n  text.push({ content: routeText, fontHeight: 5, x: 20, y: 9, color: '#3EE08A' });\n}\n\nconst payload = { duration: 10, text };\nif (iconB64) {\n  payload.image = [{ data: `data:image/gif;base64,${iconB64}`, position: [0, 0] }];\n}\n\nreturn [{ json: payload }];\n"
             }
         },
         {
@@ -189,8 +189,8 @@
                 304
             ],
             "parameters": {
-                "method": "PUT",
-                "url": "=http://{{ $('Config (edit per location)').first().json.CLOCK2_IP }}/api/v1/apps/pushed/adsb",
+                "method": "POST",
+                "url": "=http://{{ $('Config (edit per location)').first().json.CLOCK2_IP }}/api/custom?name=adsb",
                 "sendHeaders": true,
                 "headerParameters": {
                     "parameters": [
@@ -216,8 +216,20 @@
                 592
             ],
             "parameters": {
-                "method": "DELETE",
-                "url": "=http://{{ $('Config (edit per location)').first().json.CLOCK2_IP }}/api/v1/apps/adsb",
+                "method": "POST",
+                "url": "=http://{{ $('Config (edit per location)').first().json.CLOCK2_IP }}/api/custom?name=adsb",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={}",
                 "options": {}
             }
         },

@@ -1,5 +1,12 @@
 # Pushing content to a Ulanzi TC002 — reusable notes
 
+> **Historical (stock Ulanzi firmware).** Since 2026-10-07 the TC002 runs
+> AWTRIX NG 1.2.2 and none of this applies: it takes the same
+> `PUT /api/v1/apps/pushed/<app>` / `DELETE /api/v1/apps/<app>` API as the
+> TC001. The workflows now send it a 52x16 `layout` (icon box + text boxes;
+> text scrolls, `°` and lifetimeMs work, icons as `data:image/gif;base64,`
+> URLs). Kept for anyone still on the stock firmware.
+
 Learned the hard way while wiring the aircraft-overhead feed to a second
 clock. Written up so the same pattern can be dropped into any other n8n
 workflow (weather, calendar, etc.) without re-discovering all of this.
