@@ -35,25 +35,25 @@ LIVE_ONLY_NODES = ["Missing Icon?", "Missing Icon Row", "Log Missing Icon (Data 
 
 # Exact code edits for the templates, (node, parameter, old, new). In the live
 # workflow Build Payload also outputs iconCode for the missing-icon log; the
-# template has no log, so it returns the clock payload directly. Each `old`
-# must match exactly once, so a change to the live code stops the export
-# instead of producing a half-edited template.
+# template has no log, so it drops it. Each `old` must match exactly once, so
+# a change to the live code stops the export instead of producing a
+# half-edited template.
 TEMPLATE_EDITS = {
     "tc001": [
         ("Build Payload", "jsCode", "const iconCode = iconRow ? iconRow.code : '00';\n", ""),
         ("Build Payload", "jsCode",
          "// iconCode rides alongside (not inside) the clock payload so Missing Icon?\n"
-         "// can log fallbacks; Push to Clock sends only `payload`.\n"
-         "return [{ json: { payload, iconCode } }];",
-         "return [{ json: payload }];"),
-        ("Push to Clock", "jsonBody", "={{ JSON.stringify($json.payload) }}", "={{ JSON.stringify($json) }}"),
+         "// can log fallbacks; Push to Clock sends only `payload`, and only when `changed`.\n"
+         "return [{ json: { payload, iconCode, changed } }];",
+         "// Push to Clock sends only `payload`, and only when `changed`.\n"
+         "return [{ json: { payload, changed } }];"),
     ],
     "tc002": [],
 }
 
 # Nodes that belong to exactly one display; everything else is shared.
 DISPLAY_NODES = {
-    "tc001": ["Build Payload", "Push to Clock", "Clear Clock"],
+    "tc001": ["Build Payload", "Clock Payload Changed?", "Push to Clock", "Clear Clock"],
     "tc002": ["Build Payload TC002", "Push to Clock 2 (TC002)", "Clear Clock 2 (TC002)"],
     # The 64x64 matrix has its own template in the Mini Flightwall repo.
     "matrix": ["Lookup Aircraft (adsbdb)", "Merge Matrix Data", "Build Payload (Matrix64)",
@@ -71,14 +71,12 @@ CONFIG_PLACEHOLDERS = {
     "CLOCK_IP": "YOUR_CLOCK_IP",
     "CLOCK2_IP": "YOUR_CLOCK2_IP",
     "MATRIX_IP": "YOUR_MATRIX_IP",
-    "OPENSKY_CLIENT_ID": "PASTE_CLIENT_ID",
-    "OPENSKY_CLIENT_SECRET": "PASTE_CLIENT_SECRET",
-    "N8N_URL": "YOUR_N8N_HOST:5678",
-    "N8N_API_KEY": "PASTE_N8N_API_KEY",
-    "MISSING_ICON_TABLE_ID": "YOUR_MISSING_ICON_TABLE_ID",
 }
-# Data Table nodes reference their table by this instance's id.
+# Data Table nodes that pick their table by id get a placeholder named after
+# the node; credentials keep their name but lose this instance's id.
+TABLE_PLACEHOLDER = "YOUR_{}_TABLE_ID"
 TABLE_PLACEHOLDERS = {"Lookup Icon": "YOUR_AIRLINE_ICONS_TABLE_ID"}
+CREDENTIAL_PLACEHOLDER = "YOUR_CREDENTIAL_ID"
 
 
 def load_env():
@@ -173,11 +171,18 @@ def scrub(wf):
         # Coordinates are matched by prefix so they're caught in any formatting.
         secrets.add(str(a["value"])[:6] if a["name"] in ("HOME_LAT", "HOME_LON") else str(a["value"]))
         a["value"] = placeholder
-    nodes = {n["name"]: n for n in wf["nodes"]}
-    for name, placeholder in TABLE_PLACEHOLDERS.items():
-        if name in nodes:
-            secrets.add(nodes[name]["parameters"]["dataTableId"]["value"])
-            nodes[name]["parameters"]["dataTableId"] = {"__rl": True, "mode": "id", "value": placeholder}
+    for node in wf["nodes"]:
+        table = node["parameters"].get("dataTableId")
+        # "By Name" tables carry no instance id; anything else (id/list mode) does.
+        if isinstance(table, dict) and table.get("mode") != "name":
+            secrets.add(table["value"])
+            slug = re.sub(r"[^A-Z0-9]+", "_", node["name"].upper()).strip("_")
+            node["parameters"]["dataTableId"] = {"__rl": True, "mode": "id",
+                                                 "value": TABLE_PLACEHOLDERS.get(node["name"], TABLE_PLACEHOLDER.format(slug))}
+        for cred in (node.get("credentials") or {}).values():
+            if cred.get("id"):
+                secrets.add(cred["id"])
+                cred["id"] = CREDENTIAL_PLACEHOLDER
     return secrets
 
 

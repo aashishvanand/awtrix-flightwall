@@ -37,19 +37,22 @@ third-party trademarks).
 """
 import argparse
 import base64
+import functools
 import glob
 import io
+import ipaddress
 import json
 import os
-import struct
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
+import numpy as np
 from PIL import Image
 
-from convert_tiles import convert
+from convert_tiles import prepare, render
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_INPUT = os.path.join(HERE, "..", "TailFin", "tailfin")
@@ -65,10 +68,22 @@ RAW565 = {"icon24"}
 
 # AWTRIX NG rejects request bodies over 8192 bytes; leave room for the text.
 MAX_ICON_B64 = 6000
+# Concurrent n8n API writes (row upserts / deletes).
+API_WORKERS = 6
 
 
 # --- n8n ---------------------------------------------------------------------
 
+def _is_local(host):
+    if host in ("localhost", ""):
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+@functools.cache
 def load_env():
     env = {}
     with open(os.path.join(HERE, ".env"), encoding="utf-8") as f:
@@ -78,6 +93,11 @@ def load_env():
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip().strip("'\"")
     base = env["n8nurl"] if env["n8nurl"].startswith("http") else f"http://{env['n8nurl']}"
+    parsed = urllib.parse.urlparse(base)
+    if parsed.scheme == "http" and not _is_local(parsed.hostname or ""):
+        # The API key travels in a header, readable by anything on the path.
+        print(f"WARNING: n8n API key is sent over plain HTTP to {parsed.hostname}. "
+              "Use an https:// n8nurl (or localhost) in .env.", file=sys.stderr)
     return base.rstrip("/"), env["n8n"]
 
 
@@ -96,8 +116,13 @@ def api(method, path, body=None, query=None):
         raise SystemExit(f"n8n {method} {path} failed: HTTP {e.code} {e.read().decode(errors='replace')[:500]}")
 
 
+@functools.cache
+def list_tables():
+    return api("GET", "/data-tables", query={"limit": 250})["data"]
+
+
 def find_table(create):
-    tables = api("GET", "/data-tables", query={"limit": 250})["data"]
+    tables = list_tables()
     match = [t for t in tables if t["name"] == TABLE_NAME]
     if match:
         table_id = match[0]["id"]
@@ -144,7 +169,7 @@ def upsert(table_id, row):
 def prune_missing(icon_rows, dry_run):
     """Drop missing_tailfin rows the workflow would now match to a logo, by the
     same rule as Lookup Icon: the row's ICAO designator, else its IATA code."""
-    tables = api("GET", "/data-tables", query={"limit": 250})["data"]
+    tables = list_tables()
     match = [t for t in tables if t["name"] == MISSING_TABLE]
     if not match:
         return
@@ -166,11 +191,14 @@ def prune_missing(icon_rows, dry_run):
     if dry_run:
         print(f"Would remove from '{MISSING_TABLE}' (logo now in table): {names}")
         return
-    for r in covered:
+    def delete(r):
         # The filter must be compact JSON -- n8n rejects the '+' a space encodes to.
         f = json.dumps({"type": "and", "filters": [{"columnName": "id", "condition": "eq", "value": r["id"]}]},
                        separators=(",", ":"))
         api("DELETE", f"/data-tables/{table_id}/rows/delete", query={"filter": f})
+
+    with ThreadPoolExecutor(API_WORKERS) as pool:
+        list(pool.map(delete, covered))
     print(f"Removed from '{MISSING_TABLE}' (logo now in table): {names}")
 
 
@@ -178,23 +206,26 @@ def prune_missing(icon_rows, dry_run):
 
 def rgb565(gif_bytes):
     """Little-endian RGB565, row-major -- what the matrix firmware reads."""
-    img = Image.open(io.BytesIO(gif_bytes)).convert("RGB")
-    out = bytearray()
-    for r, g, b in img.get_flattened_data():
-        out += struct.pack("<H", ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3))
-    return bytes(out)
+    px = np.asarray(Image.open(io.BytesIO(gif_bytes)).convert("RGB"), dtype=np.uint16)
+    r, g, b = px[..., 0], px[..., 1], px[..., 2]
+    return (((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)).astype("<u2").tobytes()
 
 
 def encode(job):
-    path, col, mode = job
-    buf = io.BytesIO()
-    convert(path, buf, mode=mode, size=SIZES[col])
-    data = buf.getvalue()
-    if col in RAW565:
-        data = rgb565(data)
-        if len(data) != SIZES[col] ** 2 * 2:
-            raise ValueError(f"{path}: {col} packed to {len(data)} bytes")
-    return base64.b64encode(data).decode("ascii")
+    """All requested icon columns for one logo; the expensive crop runs once."""
+    path, cols, mode = job
+    flat = prepare(path, mode)
+    out = {}
+    for col in cols:
+        buf = io.BytesIO()
+        render(flat, buf, size=SIZES[col])
+        data = buf.getvalue()
+        if col in RAW565:
+            data = rgb565(data)
+            if len(data) != SIZES[col] ** 2 * 2:
+                raise ValueError(f"{path}: {col} packed to {len(data)} bytes")
+        out[col] = base64.b64encode(data).decode("ascii")
+    return out
 
 
 def source_paths(input_dir):
@@ -203,15 +234,15 @@ def source_paths(input_dir):
 
 
 def convert_codes(cols_by_code, paths_by_code, mode):
-    # Fan out across cores; each source is a ~3000px webp.
-    jobs = [(code, col) for code in cols_by_code for col in cols_by_code[code]]
+    # One job per logo (each source is a ~3000px webp), fanned out across cores.
+    codes = list(cols_by_code)
     with ProcessPoolExecutor() as pool:
-        results = pool.map(encode, [(paths_by_code[c], col, mode) for c, col in jobs])
-        out = {code: {} for code in cols_by_code}
-        for (code, col), b64 in zip(jobs, results):
+        results = pool.map(encode, [(paths_by_code[c], cols_by_code[c], mode) for c in codes])
+        out = dict(zip(codes, results))
+    for code, icons in out.items():
+        for col, b64 in icons.items():
             if len(b64) > MAX_ICON_B64:
                 raise SystemExit(f"{code}: {col} is {len(b64)} base64 chars, too big to push")
-            out[code][col] = b64
     return out
 
 
@@ -320,8 +351,8 @@ def main():
     if convert_cols:
         for code, icons in convert_codes(convert_cols, sources, args.mode).items():
             changed[code].update(icons)
-    for code, row in changed.items():
-        upsert(table_id, row)
+    with ThreadPoolExecutor(API_WORKERS) as pool:
+        list(pool.map(lambda row: upsert(table_id, row), changed.values()))
     print(f"Upserted {len(changed)} row(s) into '{TABLE_NAME}'")
 
     final = read_rows(table_id)
